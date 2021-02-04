@@ -1,3 +1,3 @@
-# RBM - Robot Behavior Manager
+# RBM - Robot Behavior Management Software Development Tool
 
-Welcome to the Github repository of the software tool "Robot Behavior Manager"
+A software development tool for building the behavior management system of autonomous robots
