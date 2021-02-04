@@ -1,0 +1,7 @@
+# This service stops a task
+
+string name                  # Name of the task to stop
+---
+bool ack                     # If this value is true, the task has been stopped correctly
+
+string error_message         # Error message

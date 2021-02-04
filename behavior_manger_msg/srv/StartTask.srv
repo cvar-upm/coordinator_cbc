@@ -1,0 +1,10 @@
+# This service starts a task
+
+TaskCommand task                # The name of the task to start and its parameters
+---
+bool ack                        # If this value is true, the task has been started correctly
+
+string error_message            # Error message
+
+string[] task
+string[] behavior

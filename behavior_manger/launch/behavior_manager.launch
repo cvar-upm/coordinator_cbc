@@ -1,0 +1,31 @@
+<launch>
+
+  <!-- Basic data -->
+  <arg name="robot_namespace"                    default="drone1" />
+  <arg name="catalog_path"                       default="$(env AEROSTACK_STACK)/stack/execution_control_system/behavior_manager/behavior_manager/src/test/behavior_catalog.yaml" />
+  <arg name="testing"                            default="false" />
+
+  <!-- topics & services-->
+  <arg name="start_task_srv"                     default="start_task" />
+  <arg name="stop_task_srv"                      default="stop_task" />
+  <arg name="behavior_activation_finished_sub"   default="behavior_activation_finished" />
+  <arg name="task_stopped_pub"                   default="task_stopped" />
+  <arg name="list_of_running_tasks_pub"          default="list_of_running_tasks" />
+
+  <group ns="$(arg robot_namespace)">
+
+    <!-- Basic data -->
+    <param name="robot_namespace"     value="$(arg robot_namespace)"    type="str" />
+    <param name="catalog_path"        value="$(arg catalog_path)"       type="str" />
+    <param name="testing"             value="$(arg testing)"            type="bool" />
+
+    <!-- topics & services -->
+    <param name="~start_task_srv"                         value="$(arg start_task_srv)"                     type="str" />
+    <param name="~stop_task_srv"                          value="$(arg stop_task_srv)"                      type="str" />
+    <param name="~behavior_activation_finished_sub"       value="$(arg behavior_activation_finished_sub)"   type="str" />
+    <param name="~task_stopped_pub"                       value="$(arg task_stopped_pub)"                   type="str" />
+    <param name="~list_of_running_tasks_pub"              value="$(arg list_of_running_tasks_pub)"          type="str" />
+    
+    <node name="behavior_manager" pkg="behavior_manager"  type="behavior_manager"  output="screen"/>
+  </group>
+</launch>
