@@ -1,0 +1,3 @@
+[submodule "behaviorlib"]
+	path = behaviorlib
+	url = https://github.com/cvar-upm/behaviorlib.git
