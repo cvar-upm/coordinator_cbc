@@ -1,0 +1,585 @@
+default_values:
+  - tasks:
+      - automatic_activation: TRUE
+behaviors:
+  - behavior: behavior0_0_0
+    task: task0_0
+    efficacy: 95
+    requires:
+      - task: task2_0
+      - task: task1_1
+  - behavior: behavior0_0_1
+    task: task0_0
+    efficacy: 91
+    requires:
+      - task: task2_0
+      - task: task2_1
+  - behavior: behavior0_0_2
+    task: task0_0
+    efficacy: 100
+    requires:
+      - task: task2_0
+      - task: task1_2
+  - behavior: behavior0_1_0
+    task: task0_1
+    efficacy: 71
+    requires:
+      - task: task1_1
+      - task: task2_0
+  - behavior: behavior0_1_1
+    task: task0_1
+    efficacy: 62
+    requires:
+      - task: task2_1
+      - task: task1_0
+  - behavior: behavior0_1_2
+    task: task0_1
+    efficacy: 74
+    requires:
+      - task: task1_1
+      - task: task1_0
+  - behavior: behavior0_2_0
+    task: task0_2
+    efficacy: 94
+    requires:
+      - task: task1_2
+      - task: task2_0
+  - behavior: behavior0_2_1
+    task: task0_2
+    efficacy: 89
+    requires:
+      - task: task2_2
+      - task: task2_0
+  - behavior: behavior0_2_2
+    task: task0_2
+    efficacy: 94
+    requires:
+      - task: task2_2
+      - task: task2_0
+  - behavior: behavior0_3_0
+    task: task0_3
+    efficacy: 81
+    requires:
+      - task: task2_3
+      - task: task2_5
+  - behavior: behavior0_3_1
+    task: task0_3
+    efficacy: 60
+    requires:
+      - task: task2_3
+      - task: task1_4
+  - behavior: behavior0_3_2
+    task: task0_3
+    efficacy: 96
+    requires:
+      - task: task1_3
+      - task: task2_5
+  - behavior: behavior0_4_0
+    task: task0_4
+    efficacy: 65
+    requires:
+      - task: task2_4
+      - task: task1_5
+  - behavior: behavior0_4_1
+    task: task0_4
+    efficacy: 66
+    requires:
+      - task: task2_4
+      - task: task2_5
+  - behavior: behavior0_4_2
+    task: task0_4
+    efficacy: 85
+    requires:
+      - task: task1_4
+      - task: task2_3
+  - behavior: behavior0_5_0
+    task: task0_5
+    efficacy: 95
+    requires:
+      - task: task1_5
+      - task: task2_4
+  - behavior: behavior0_5_1
+    task: task0_5
+    efficacy: 96
+    requires:
+      - task: task1_5
+      - task: task2_4
+  - behavior: behavior0_5_2
+    task: task0_5
+    efficacy: 98
+    requires:
+      - task: task1_5
+      - task: task1_4
+  - behavior: behavior0_6_0
+    task: task0_6
+    efficacy: 85
+    requires:
+      - task: task1_6
+      - task: task1_8
+  - behavior: behavior0_6_1
+    task: task0_6
+    efficacy: 90
+    requires:
+      - task: task1_6
+      - task: task1_7
+  - behavior: behavior0_6_2
+    task: task0_6
+    efficacy: 83
+    requires:
+      - task: task1_6
+      - task: task2_7
+  - behavior: behavior0_7_0
+    task: task0_7
+    efficacy: 76
+    requires:
+      - task: task1_7
+      - task: task2_8
+  - behavior: behavior0_7_1
+    task: task0_7
+    efficacy: 91
+    requires:
+      - task: task1_7
+      - task: task1_8
+  - behavior: behavior0_7_2
+    task: task0_7
+    efficacy: 89
+    requires:
+      - task: task2_7
+      - task: task2_6
+  - behavior: behavior0_8_0
+    task: task0_8
+    efficacy: 77
+    requires:
+      - task: task1_8
+      - task: task2_6
+  - behavior: behavior0_8_1
+    task: task0_8
+    efficacy: 98
+    requires:
+      - task: task2_8
+      - task: task1_7
+  - behavior: behavior0_8_2
+    task: task0_8
+    efficacy: 82
+    requires:
+      - task: task1_8
+      - task: task1_6
+  - behavior: behavior1_0_0
+    task: task1_0
+    efficacy: 88
+    requires:
+      - task: task2_0
+      - task: task2_2
+  - behavior: behavior1_0_1
+    task: task1_0
+    efficacy: 86
+    requires:
+      - task: task2_0
+      - task: task2_2
+  - behavior: behavior1_0_2
+    task: task1_0
+    efficacy: 68
+    requires:
+      - task: task2_0
+      - task: task2_1
+  - behavior: behavior1_1_0
+    task: task1_1
+    efficacy: 83
+    requires:
+      - task: task2_1
+      - task: task2_0
+  - behavior: behavior1_1_1
+    task: task1_1
+    efficacy: 72
+    requires:
+      - task: task2_1
+      - task: task2_2
+  - behavior: behavior1_1_2
+    task: task1_1
+    efficacy: 79
+    requires:
+      - task: task2_1
+      - task: task2_0
+  - behavior: behavior1_2_0
+    task: task1_2
+    efficacy: 87
+    requires:
+      - task: task2_2
+      - task: task2_0
+  - behavior: behavior1_2_1
+    task: task1_2
+    efficacy: 80
+    requires:
+      - task: task2_2
+      - task: task2_0
+  - behavior: behavior1_2_2
+    task: task1_2
+    efficacy: 95
+    requires:
+      - task: task2_2
+      - task: task2_1
+  - behavior: behavior1_3_0
+    task: task1_3
+    efficacy: 62
+    requires:
+      - task: task2_3
+      - task: task2_5
+  - behavior: behavior1_3_1
+    task: task1_3
+    efficacy: 68
+    requires:
+      - task: task2_3
+      - task: task2_4
+  - behavior: behavior1_3_2
+    task: task1_3
+    efficacy: 60
+    requires:
+      - task: task2_3
+      - task: task2_5
+  - behavior: behavior1_4_0
+    task: task1_4
+    efficacy: 75
+    requires:
+      - task: task2_4
+      - task: task2_5
+  - behavior: behavior1_4_1
+    task: task1_4
+    efficacy: 88
+    requires:
+      - task: task2_4
+      - task: task2_3
+  - behavior: behavior1_4_2
+    task: task1_4
+    efficacy: 62
+    requires:
+      - task: task2_4
+      - task: task2_5
+  - behavior: behavior1_5_0
+    task: task1_5
+    efficacy: 92
+    requires:
+      - task: task2_5
+      - task: task2_3
+  - behavior: behavior1_5_1
+    task: task1_5
+    efficacy: 88
+    requires:
+      - task: task2_5
+      - task: task2_3
+  - behavior: behavior1_5_2
+    task: task1_5
+    efficacy: 95
+    requires:
+      - task: task2_5
+      - task: task2_4
+  - behavior: behavior1_6_0
+    task: task1_6
+    efficacy: 100
+    requires:
+      - task: task2_6
+      - task: task2_7
+  - behavior: behavior1_6_1
+    task: task1_6
+    efficacy: 90
+    requires:
+      - task: task2_6
+      - task: task2_8
+  - behavior: behavior1_6_2
+    task: task1_6
+    efficacy: 83
+    requires:
+      - task: task2_6
+      - task: task2_8
+  - behavior: behavior1_7_0
+    task: task1_7
+    efficacy: 65
+    requires:
+      - task: task2_7
+      - task: task2_6
+  - behavior: behavior1_7_1
+    task: task1_7
+    efficacy: 95
+    requires:
+      - task: task2_7
+      - task: task2_8
+  - behavior: behavior1_7_2
+    task: task1_7
+    efficacy: 81
+    requires:
+      - task: task2_7
+      - task: task2_6
+  - behavior: behavior1_8_0
+    task: task1_8
+    efficacy: 61
+    requires:
+      - task: task2_8
+      - task: task2_6
+  - behavior: behavior1_8_1
+    task: task1_8
+    efficacy: 88
+    requires:
+      - task: task2_8
+      - task: task2_7
+  - behavior: behavior1_8_2
+    task: task1_8
+    efficacy: 74
+    requires:
+      - task: task2_8
+      - task: task2_6
+  - behavior: behavior2_0_0
+    task: task2_0
+    efficacy: 94
+    requires: ~
+  - behavior: behavior2_0_1
+    task: task2_0
+    efficacy: 99
+    requires: ~
+  - behavior: behavior2_0_2
+    task: task2_0
+    efficacy: 92
+    requires: ~
+  - behavior: behavior2_1_0
+    task: task2_1
+    efficacy: 60
+    requires: ~
+  - behavior: behavior2_1_1
+    task: task2_1
+    efficacy: 88
+    requires: ~
+  - behavior: behavior2_1_2
+    task: task2_1
+    efficacy: 99
+    requires: ~
+  - behavior: behavior2_2_0
+    task: task2_2
+    efficacy: 100
+    requires: ~
+  - behavior: behavior2_2_1
+    task: task2_2
+    efficacy: 84
+    requires: ~
+  - behavior: behavior2_2_2
+    task: task2_2
+    efficacy: 100
+    requires: ~
+  - behavior: behavior2_3_0
+    task: task2_3
+    efficacy: 96
+    requires: ~
+  - behavior: behavior2_3_1
+    task: task2_3
+    efficacy: 66
+    requires: ~
+  - behavior: behavior2_3_2
+    task: task2_3
+    efficacy: 86
+    requires: ~
+  - behavior: behavior2_4_0
+    task: task2_4
+    efficacy: 73
+    requires: ~
+  - behavior: behavior2_4_1
+    task: task2_4
+    efficacy: 87
+    requires: ~
+  - behavior: behavior2_4_2
+    task: task2_4
+    efficacy: 87
+    requires: ~
+  - behavior: behavior2_5_0
+    task: task2_5
+    efficacy: 85
+    requires: ~
+  - behavior: behavior2_5_1
+    task: task2_5
+    efficacy: 91
+    requires: ~
+  - behavior: behavior2_5_2
+    task: task2_5
+    efficacy: 62
+    requires: ~
+  - behavior: behavior2_6_0
+    task: task2_6
+    efficacy: 89
+    requires: ~
+  - behavior: behavior2_6_1
+    task: task2_6
+    efficacy: 92
+    requires: ~
+  - behavior: behavior2_6_2
+    task: task2_6
+    efficacy: 73
+    requires: ~
+  - behavior: behavior2_7_0
+    task: task2_7
+    efficacy: 100
+    requires: ~
+  - behavior: behavior2_7_1
+    task: task2_7
+    efficacy: 93
+    requires: ~
+  - behavior: behavior2_7_2
+    task: task2_7
+    efficacy: 73
+    requires: ~
+  - behavior: behavior2_8_0
+    task: task2_8
+    efficacy: 70
+    requires: ~
+  - behavior: behavior2_8_1
+    task: task2_8
+    efficacy: 80
+    requires: ~
+  - behavior: behavior2_8_2
+    task: task2_8
+    efficacy: 94
+    requires: ~
+  - behavior: empty
+    task: empty
+tasks:
+  - task: task0_0
+  - task: task0_1
+  - task: task0_2
+  - task: task0_3
+  - task: task0_4
+  - task: task0_5
+  - task: task0_6
+  - task: task0_7
+  - task: task0_8
+  - task: task1_0
+  - task: task1_1
+  - task: task1_2
+  - task: task1_3
+  - task: task1_4
+  - task: task1_5
+  - task: task1_6
+  - task: task1_7
+  - task: task1_8
+  - task: task2_0
+  - task: task2_1
+  - task: task2_2
+  - task: task2_3
+  - task: task2_4
+  - task: task2_5
+  - task: task2_6
+  - task: task2_7
+  - task: task2_8
+  - task: empty
+exclusivity_constraints:
+  - mutually_exclusive:
+      - task0_0
+      - task2_3
+      - task2_6
+  - mutually_exclusive:
+      - task2_2
+      - task2_4
+      - task0_7
+  - mutually_exclusive:
+      - task2_2
+      - task1_3
+      - task0_7
+  - mutually_exclusive:
+      - task1_1
+      - task1_4
+      - task1_6
+  - mutually_exclusive:
+      - task2_1
+      - task2_5
+      - task2_6
+  - mutually_exclusive:
+      - task1_1
+      - task1_3
+      - task0_7
+  - mutually_exclusive:
+      - task1_2
+      - task1_3
+      - task2_7
+  - mutually_exclusive:
+      - task0_1
+      - task0_4
+      - task1_8
+  - mutually_exclusive:
+      - task1_0
+      - task1_5
+      - task0_6
+  - mutually_exclusive:
+      - empty
+      - task0_0
+  - mutually_exclusive:
+      - empty
+      - task0_1
+  - mutually_exclusive:
+      - empty
+      - task0_2
+  - mutually_exclusive:
+      - empty
+      - task0_3
+  - mutually_exclusive:
+      - empty
+      - task0_4
+  - mutually_exclusive:
+      - empty
+      - task0_5
+  - mutually_exclusive:
+      - empty
+      - task0_6
+  - mutually_exclusive:
+      - empty
+      - task0_7
+  - mutually_exclusive:
+      - empty
+      - task0_8
+  - mutually_exclusive:
+      - empty
+      - task1_0
+  - mutually_exclusive:
+      - empty
+      - task1_1
+  - mutually_exclusive:
+      - empty
+      - task1_2
+  - mutually_exclusive:
+      - empty
+      - task1_3
+  - mutually_exclusive:
+      - empty
+      - task1_4
+  - mutually_exclusive:
+      - empty
+      - task1_5
+  - mutually_exclusive:
+      - empty
+      - task1_6
+  - mutually_exclusive:
+      - empty
+      - task1_7
+  - mutually_exclusive:
+      - empty
+      - task1_8
+  - mutually_exclusive:
+      - empty
+      - task2_0
+  - mutually_exclusive:
+      - empty
+      - task2_1
+  - mutually_exclusive:
+      - empty
+      - task2_2
+  - mutually_exclusive:
+      - empty
+      - task2_3
+  - mutually_exclusive:
+      - empty
+      - task2_4
+  - mutually_exclusive:
+      - empty
+      - task2_5
+  - mutually_exclusive:
+      - empty
+      - task2_6
+  - mutually_exclusive:
+      - empty
+      - task2_7
+  - mutually_exclusive:
+      - empty
+      - task2_8

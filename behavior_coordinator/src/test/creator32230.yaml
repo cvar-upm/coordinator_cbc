@@ -1,0 +1,141 @@
+default_values:
+  - tasks:
+      - automatic_activation: TRUE
+behaviors:
+  - behavior: behavior0_0_0
+    task: task0_0
+    efficacy: 95
+    requires:
+      - task: task1_0
+      - task: task1_1
+  - behavior: behavior0_0_1
+    task: task0_0
+    efficacy: 99
+    requires:
+      - task: task2_0
+      - task: task1_2
+  - behavior: behavior0_1_0
+    task: task0_1
+    efficacy: 63
+    requires:
+      - task: task1_1
+      - task: task1_0
+  - behavior: behavior0_1_1
+    task: task0_1
+    efficacy: 88
+    requires:
+      - task: task1_1
+      - task: task2_2
+  - behavior: behavior0_2_0
+    task: task0_2
+    efficacy: 67
+    requires:
+      - task: task1_2
+      - task: task2_0
+  - behavior: behavior0_2_1
+    task: task0_2
+    efficacy: 68
+    requires:
+      - task: task1_2
+      - task: task1_0
+  - behavior: behavior1_0_0
+    task: task1_0
+    efficacy: 73
+    requires:
+      - task: task2_0
+      - task: task2_2
+  - behavior: behavior1_0_1
+    task: task1_0
+    efficacy: 62
+    requires:
+      - task: task2_0
+      - task: task2_1
+  - behavior: behavior1_1_0
+    task: task1_1
+    efficacy: 89
+    requires:
+      - task: task2_1
+      - task: task2_0
+  - behavior: behavior1_1_1
+    task: task1_1
+    efficacy: 67
+    requires:
+      - task: task2_1
+      - task: task2_0
+  - behavior: behavior1_2_0
+    task: task1_2
+    efficacy: 72
+    requires:
+      - task: task2_2
+      - task: task2_0
+  - behavior: behavior1_2_1
+    task: task1_2
+    efficacy: 87
+    requires:
+      - task: task2_2
+      - task: task2_0
+  - behavior: behavior2_0_0
+    task: task2_0
+    efficacy: 94
+    requires: ~
+  - behavior: behavior2_0_1
+    task: task2_0
+    efficacy: 97
+    requires: ~
+  - behavior: behavior2_1_0
+    task: task2_1
+    efficacy: 96
+    requires: ~
+  - behavior: behavior2_1_1
+    task: task2_1
+    efficacy: 99
+    requires: ~
+  - behavior: behavior2_2_0
+    task: task2_2
+    efficacy: 66
+    requires: ~
+  - behavior: behavior2_2_1
+    task: task2_2
+    efficacy: 89
+    requires: ~
+  - behavior: empty
+    task: empty
+tasks:
+  - task: task0_0
+  - task: task0_1
+  - task: task0_2
+  - task: task1_0
+  - task: task1_1
+  - task: task1_2
+  - task: task2_0
+  - task: task2_1
+  - task: task2_2
+  - task: empty
+exclusivity_constraints:
+  - mutually_exclusive:
+      - empty
+      - task0_0
+  - mutually_exclusive:
+      - empty
+      - task0_1
+  - mutually_exclusive:
+      - empty
+      - task0_2
+  - mutually_exclusive:
+      - empty
+      - task1_0
+  - mutually_exclusive:
+      - empty
+      - task1_1
+  - mutually_exclusive:
+      - empty
+      - task1_2
+  - mutually_exclusive:
+      - empty
+      - task2_0
+  - mutually_exclusive:
+      - empty
+      - task2_1
+  - mutually_exclusive:
+      - empty
+      - task2_2

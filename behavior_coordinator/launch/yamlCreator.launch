@@ -1,0 +1,32 @@
+<launch>
+
+  <!-- Basic data -->
+  <arg name="robot_namespace"                    default="drone" />
+  <arg name="robot_id"                           default="111" />
+  <arg name="my_stack_directory"                 default="$(env AEROSTACK_STACK)" />
+  <arg name="behavior_catalog_path"              default="$(env AEROSTACK_STACK)/configs/general/behavior_catalog_aerostack_executive.yaml" />
+  <arg name="T"                                  default="1" />
+  <arg name="B"                                  default="1" />
+  <arg name="R"                                  default="1" />
+  <arg name="L"                                  default="1" />
+  <arg name="M"                                  default="1" />
+
+  <group ns="$(arg robot_namespace)">
+
+    <!-- Basic data -->
+    <param name="robot_namespace"     value="$(arg robot_namespace)"    type="str" />
+    <param name="robot_id"               value="$(arg robot_id)"              type="str" />
+    <param name="~my_stack_directory"     value="$(arg my_stack_directory)"    type="str" />
+    <param name="behavior_catalog_path"  value="$(arg behavior_catalog_path)" type="str" />
+    <param name="T"  value="$(arg T)" type="int" />
+    <param name="B"  value="$(arg B)" type="int" />
+    <param name="R"  value="$(arg R)" type="int" />
+    <param name="L"  value="$(arg L)" type="int" />
+    <param name="M"  value="$(arg M)" type="int" />
+
+    <node name="yamlCreator" pkg="behavior_coordinator"  type="yamlCreator"  output="screen"/>
+
+  </group>
+
+</launch>
+

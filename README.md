@@ -1,3 +1,3 @@
-# Behavior Coordination CBC
+# Behavior Management Tool
 
-A software development tool for building the behavior coordination system of autonomous robots. 
+A software development tool for building the behavior management system of autonomous robots
