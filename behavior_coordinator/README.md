@@ -9,16 +9,16 @@ consistency, for example if a behavior fails, does not work as expected or it's 
 in order to continue the same task or stop it.
 
 # Services
-- **start_task** ([behavior_coordinator_msgs/StartTask](https://github.com/cvar-upm/coordinator_cbc/blob/main/behavior_manager_msg/srv/StartTask.srv))  
+- **start_task** ([behavior_coordinator_msgs/StartTask](https://github.com/cvar-upm/coordinator_cbc/blob/main/behavior_coordinator_msgs/srv/StartTask.srv))  
 Starts a given task.
 
-- **stop_task** ([behavior_coordinator_msgs/StopTask](https://github.com/cvar-upm/coordinator_cbc/blob/main/behavior_manager_msg/srv/StopTask.srv))  
+- **stop_task** ([behavior_coordinator_msgs/StopTask](https://github.com/cvar-upm/coordinator_cbc/blob/main/behavior_coordinator_msgs/srv/StopTask.srv))  
 Stops a given task.
 
 # Published topics
 
 # Subscribed topics
-- **task_stopped**  ([behavior_coordinator_msgs/TaskStopped](https://github.com/cvar-upm/coordinator_cbc/blob/main/behavior_manager_msg/msg/TaskStopped.msg))  
+- **task_stopped**  ([behavior_coordinator_msgs/TaskStopped](https://github.com/cvar-upm/coordinator_cbc/blob/main/behavior_coordinator_msgs/msg/TaskStopped.msg))  
 Informs about the result of the execution of a task that has stopped.
 
 ---
