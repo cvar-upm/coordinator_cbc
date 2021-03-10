@@ -17,14 +17,14 @@
   <build_depend>yaml-cpp</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>behavior_coordinator_msgs</build_depend>
-  <build_depend>behavior_execution_manager_msg</build_depend>
+  <build_depend>behavior_execution_manager_msgs</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>yaml-cpp</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>behavior_coordinator_msgs</run_depend>
-  <run_depend>behavior_execution_manager_msg</run_depend>
+  <run_depend>behavior_execution_manager_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

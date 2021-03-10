@@ -66,13 +66,13 @@ bool Behavior::deactivate(){
 void Behavior::initCheckSituation(){
   behavior_name_tolower = name;
   std::transform(behavior_name_tolower.begin(), behavior_name_tolower.end(), behavior_name_tolower.begin(), ::tolower);
-  checkSituation_srv = nh.serviceClient<behavior_execution_manager_msg::CheckSituation>("/" + robot_namespace + robot_id + "/" + package + "/behavior_" +
+  checkSituation_srv = nh.serviceClient<behavior_execution_manager_msgs::CheckSituation>("/" + robot_namespace + robot_id + "/" + package + "/behavior_" +
                                                                                 behavior_name_tolower + "/" + check_situation_str,true);
 }
 
 bool Behavior::checkSituation(){
   if(ros::service::exists("/" + robot_namespace + robot_id + "/" + package + "/behavior_" + behavior_name_tolower + "/" + check_situation_str,true)){
-    behavior_execution_manager_msg::CheckSituation msg;
+    behavior_execution_manager_msgs::CheckSituation msg;
     checkSituation_srv.call(msg);
     return bool(msg.response.situation_occurs);
   }

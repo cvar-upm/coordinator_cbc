@@ -52,9 +52,9 @@
 #include <behavior_coordinator_msgs/TaskStopped.h>
 //#include <behavior_coordinator_msgs/ListOfRunningTasks.h>
 //#include <behavior_coordinator_msgs/TaskCommand.h>
-#include <behavior_execution_manager_msg/BehaviorActivationFinished.h>
-#include <behavior_execution_manager_msg/ActivateBehavior.h>
-#include <behavior_execution_manager_msg/DeactivateBehavior.h>
+#include <behavior_execution_manager_msgs/BehaviorActivationFinished.h>
+#include <behavior_execution_manager_msgs/ActivateBehavior.h>
+#include <behavior_execution_manager_msgs/DeactivateBehavior.h>
 #include <behavior_coordinator_msgs/ActivationChange.h>
 
 class BehaviorCoordinator
@@ -96,7 +96,7 @@ public:
   //ros::Publisher list_of_running_tasks_pub;
   ros::Publisher activation_change_pub;
 
-  void behaviorActivationFinishedCallback(const behavior_execution_manager_msg::BehaviorActivationFinished &message);
+  void behaviorActivationFinishedCallback(const behavior_execution_manager_msgs::BehaviorActivationFinished &message);
   bool activateTaskCallback(behavior_coordinator_msgs::StartTask::Request &request, behavior_coordinator_msgs::StartTask::Response &response);
   bool deactivateTaskCallback(behavior_coordinator_msgs::StopTask::Request &request, behavior_coordinator_msgs::StopTask::Response &response);
 

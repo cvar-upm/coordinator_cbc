@@ -57,6 +57,7 @@ find_package(catkin REQUIRED
   roslib
   std_msgs
   behavior_coordinator_msgs
+  behavior_execution_manager_msgs
 )
 
 ###################################
@@ -71,6 +72,8 @@ catkin_package(
   CATKIN_DEPENDS
   roscpp
   std_msgs
+  behavior_coordinator_msgs
+  behavior_execution_manager_msgs
   DEPENDS yaml-cpp
   rospy
   rospkg

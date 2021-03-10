@@ -9,7 +9,7 @@ import time
 
 from behavior_coordinator_msgs.srv import StartTask, StopTask
 from behavior_coordinator_msgs.msg import TaskCommand, TaskStopped, ListOfRunningTasks
-from behavior_execution_manager_msg import BehaviorActivationFinished
+from behavior_execution_manager_msgs import BehaviorActivationFinished
 
 def activate_a_task(name, priority, parameters):
     rospy.wait_for_service('/drone111/start_task')

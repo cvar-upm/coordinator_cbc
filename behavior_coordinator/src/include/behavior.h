@@ -37,7 +37,7 @@
 #include <ros/ros.h>
 
 // Aerostack
-#include <behavior_execution_manager_msg/CheckSituation.h>
+#include <behavior_execution_manager_msgs/CheckSituation.h>
 
 class Task;
 

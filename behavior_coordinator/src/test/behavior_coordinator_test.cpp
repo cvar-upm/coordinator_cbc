@@ -65,7 +65,7 @@ std::string getActiveBehavior(std::string task_name){
 bool simulateBehaviorFinished(std::string task_name, int cause, int delay_ms){
   std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
   std::string behavior_name = getActiveBehavior(task_name);
-  behavior_execution_manager_msg::BehaviorActivationFinished msg;
+  behavior_execution_manager_msgs::BehaviorActivationFinished msg;
   msg.name = behavior_name;
   msg.termination_cause = cause;
   if(deactivate_behavior_pub.getNumSubscribers()>0){
@@ -109,17 +109,17 @@ TEST(BehaviorCoordinatorTest0, Real_Catalog) {
   }
   std::thread second (bmanager,manager);
   bool status = startTask("TAKE_OFF", 2, "");
-  //status = status && simulateBehaviorFinished("TAKE_OFF", behavior_execution_manager_msg::BehaviorActivationFinished::GOAL_ACHIEVED, 100);
+  //status = status && simulateBehaviorFinished("TAKE_OFF", behavior_execution_manager_msgs::BehaviorActivationFinished::GOAL_ACHIEVED, 100);
   status = status && startTask("FOLLOW_PATH", 2, "");
   /*
-  status = status && simulateBehaviorFinished("FOLLOW_PATH", behavior_execution_manager_msg::BehaviorActivationFinished::INTERRUPTED, 100);
+  status = status && simulateBehaviorFinished("FOLLOW_PATH", behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED, 100);
   //status = status && stopTask("FOLLOW_PATH");
   status = status && startTask("FOLLOW_PATH", 2, "");
   status = status && startTask("FOLLOW_PATH", 2, "");
-  status = status && simulateBehaviorFinished("FOLLOW_PATH", behavior_execution_manager_msg::BehaviorActivationFinished::WRONG_PROGRESS, 100);
+  status = status && simulateBehaviorFinished("FOLLOW_PATH", behavior_execution_manager_msgs::BehaviorActivationFinished::WRONG_PROGRESS, 100);
   //status = status && stopTask("FOLLOW_PATH");
   status = status && startTask("LAND", 2, "");
-  status = status && simulateBehaviorFinished("LAND", behavior_execution_manager_msg::BehaviorActivationFinished::GOAL_ACHIEVED, 100);*/
+  status = status && simulateBehaviorFinished("LAND", behavior_execution_manager_msgs::BehaviorActivationFinished::GOAL_ACHIEVED, 100);*/
   stopThread = true;
   second.join();
   EXPECT_TRUE(status);
@@ -227,7 +227,7 @@ int main(int argc, char **argv){
   ros::init(argc, argv, "tester");
   n = new ros::NodeHandle;
   path = ros::package::getPath("behavior_coordinator");
-  deactivate_behavior_pub = n->advertise<behavior_execution_manager_msg::BehaviorActivationFinished>("/drone1/behavior_activation_finished", 0);
+  deactivate_behavior_pub = n->advertise<behavior_execution_manager_msgs::BehaviorActivationFinished>("/drone1/behavior_activation_finished", 0);
   testing::InitGoogleTest(&argc, argv);
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
   return RUN_ALL_TESTS();
