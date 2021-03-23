@@ -44,17 +44,17 @@
 #include "../include/behavior.h"
 #include "../include/prettify.h"
 
-class DefaultValue
+class ReactiveValue
 {
 public:
-  std::string category;
+  std::string execution_goal;
   int timeout;
-  double efficacy;
+  double suitability;
   std::string type;
-  bool automatic_activation;
-  bool default_value;
-  DefaultValue(){};
-  ~DefaultValue(){};
+  bool start_on_request;
+  bool reactive_start_value;
+  ReactiveValue(){};
+  ~ReactiveValue(){};
   
 private:
 };
@@ -67,7 +67,7 @@ public:
   std::list<Task> initialTasks;
   std::list<Task*> tasks;
   std::list<Constraint*> constraints;
-  std::list<DefaultValue> default_values;
+  std::list<ReactiveValue> default_values;
   std::list<std::string> errors;
   Catalog(std::string path_file);
   Catalog();

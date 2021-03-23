@@ -17,7 +17,7 @@
 #
 # requires: List of task required by the behavior.
 #
-# efficacy: Efficacy of the behavior (in percentage).
+# suitability: Suitability of the behavior (in percentage).
 # An integer in [0,100]
 #
 # TASKS:
@@ -25,13 +25,13 @@
 # For each task that a behavior can perform, a
 # descriptor is specified using the following attributes:
 #
-# category: A value of {goal_based, recurrent}.
+# execution_goal: A value of {achieve_goal, keep_running}.
 #
-# default: Expresses if the task is activated by
+# reactive_start: Expresses if the task is activated by
 # default or not. Boolean {TRUE,FALSE}.
 #
-# automatic_activation: Expresses if the task can be
-# activated automatically or not.
+# start_on_request: Expresses if the task can only be
+# started by request or automatically.
 # Boolean {TRUE,FALSE}.
 #
 # parameters: List of available parameters for the
@@ -47,12 +47,12 @@
 #------------------------------------------------------
 default_values:
 - tasks:
-  - category: goal_based
-    automatic_activation: FALSE
-    default: FALSE
+  - execution_goal: achieve_goal
+    start_on_request: TRUE
+    reactive_start: FALSE
     timeout: 15
 - behaviors:
-  - efficacy: 100
+  - suitability: 100
 
 #------------------------------------------------------
 behaviors:
@@ -83,7 +83,7 @@ behaviors:
 - behavior: ESTIMATE_POSITION_WITH_LINEAR_SPEED
   package: basic_quadrotor_behaviors
   task: ESTIMATE_POSITION
-  efficacy: 80
+  suitability: 80
 
 #------------------------------------------------------
 - behavior: HOVER_WITH_MPC_CONTROL
@@ -101,7 +101,7 @@ behaviors:
 - behavior: FOLLOW_PATH_WITH_MPC_CONTROL
   package: quadrotor_motion_with_mpc_control
   task: FOLLOW_PATH
-  efficacy: 80
+  suitability: 80
   requires:
   - task: MPC_MOTION_CONTROL
 
@@ -134,14 +134,14 @@ behaviors:
 - behavior: FOLLOW_PATH_WITH_PID_CONTROL
   package: quadrotor_motion_with_pid_control
   task: FOLLOW_PATH
-  efficacy: 90
+  suitability: 90
   requires:
   - task: PID_MOTION_CONTROL
 
 - behavior: QUADROTOR_PID_MOTION_CONTROL
   package: quadrotor_motion_with_pid_control
   task: PID_MOTION_CONTROL
-  efficacy: 90
+  suitability: 90
   requires:
   - task: SELF_LOCALIZE
     minimum_performance: 70
@@ -210,8 +210,8 @@ tasks:
 - task: TAKE_OFF
 
 - task: HOVER
-  category: recurrent
-  default: TRUE
+  execution_goal: keep_running
+  start_on_request: FALSE
 
 - task: WAIT
   parameters:
@@ -252,30 +252,30 @@ tasks:
     allowed_values: string
 
 - task: PAY_ATTENTION_TO_QR_CODES
-  category: recurrent
+  execution_goal: keep_running
 
 - task: PAY_ATTENTION_TO_ROBOT_MESSAGES
-  category: recurrent
+  execution_goal: keep_running
 
 - task: PID_MOTION_CONTROL
-  automatic_activation: TRUE
-  category: recurrent
+  start_on_request: FALSE
+  execution_goal: keep_running
 
 - task: THRUST_CONTROL
-  automatic_activation: TRUE
-  category: recurrent
+  start_on_request: FALSE
+  execution_goal: keep_running
 
 - task: MPC_MOTION_CONTROL
-  automatic_activation: TRUE
-  category: recurrent
+  start_on_request: FALSE
+  execution_goal: keep_running
 
 - task: SELF_LOCALIZE
-  automatic_activation: TRUE
-  category: recurrent
+  start_on_request: FALSE
+  execution_goal: keep_running
 
 - task: ESTIMATE_POSITION
-  automatic_activation: TRUE
-  category: recurrent
+  start_on_request: FALSE
+  execution_goal: keep_running
 
 - task: INFORM_OPERATOR
   parameters:
@@ -301,7 +301,7 @@ tasks:
     allowed_values: string
 
 - task: INFORM_POSITION_TO_ROBOTS
-  category: recurrent
+  execution_goal: keep_running
 
 #------------------------------------------------------
 exclusivity_constraints:

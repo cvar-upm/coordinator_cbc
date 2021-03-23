@@ -48,7 +48,7 @@ int main(int argc, char** argv){
   while (ros::ok())
   {
    ros::spinOnce();
-   coordinator.checkDefaultActivations();
+   coordinator.checkReactiveStarts();
    coordinator.checkTimeouts();
    //coordinator.publishListOfRunningTasks();
    r.sleep();

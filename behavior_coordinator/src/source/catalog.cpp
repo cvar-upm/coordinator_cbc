@@ -47,38 +47,38 @@ Catalog::Catalog(std::string path_file){
         for (YAML::const_iterator default_valuesIterator=yaml_node["default_values"].begin();
         default_valuesIterator!=yaml_node["default_values"].end();++default_valuesIterator) {
           if((*default_valuesIterator)["tasks"]){
-            DefaultValue newDefaultValue;
+            ReactiveValue newReactiveValue;
             for (YAML::const_iterator tasksIterator=(*default_valuesIterator)["tasks"].begin();
             tasksIterator!=(*default_valuesIterator)["tasks"].end();++tasksIterator) {
-              if((*tasksIterator)["category"]){
-                newDefaultValue.category = (*tasksIterator)["category"].as<std::string>();
+              if((*tasksIterator)["execution_goal"]){
+                newReactiveValue.execution_goal = (*tasksIterator)["execution_goal"].as<std::string>();
               }
               if((*tasksIterator)["timeout"]){
-                newDefaultValue.timeout = (*tasksIterator)["timeout"].as<int>();
+                newReactiveValue.timeout = (*tasksIterator)["timeout"].as<int>();
               }
-              if((*tasksIterator)["automatic_activation"]){
-                newDefaultValue.automatic_activation = (*tasksIterator)["automatic_activation"].as<std::string>() == "TRUE";
+              if((*tasksIterator)["start_on_request"]){
+                newReactiveValue.start_on_request = (*tasksIterator)["start_on_request"].as<std::string>() == "TRUE";
               }
-              if((*tasksIterator)["default"]){
-                newDefaultValue.default_value = (*tasksIterator)["default"].as<std::string>() == "TRUE";
+              if((*tasksIterator)["reactive_start"]){
+                newReactiveValue.reactive_start_value = (*tasksIterator)["reactive_start"].as<std::string>() == "TRUE";
               }
             }
-            newDefaultValue.type = "tasks";
-            default_values.push_back(newDefaultValue);
+            newReactiveValue.type = "tasks";
+            default_values.push_back(newReactiveValue);
           }
           if((*default_valuesIterator)["behaviors"]){
-            DefaultValue newDefaultValue;
+            ReactiveValue newReactiveValue;
             for (YAML::const_iterator behaviorsIterator=(*default_valuesIterator)["behaviors"].begin();
             behaviorsIterator!=(*default_valuesIterator)["behaviors"].end();++behaviorsIterator) {
-              if((*behaviorsIterator)["efficacy"]){
-                newDefaultValue.efficacy = (*behaviorsIterator)["efficacy"].as<double>()/100;
+              if((*behaviorsIterator)["suitability"]){
+                newReactiveValue.suitability = (*behaviorsIterator)["suitability"].as<double>()/100;
               }
               else{
-                newDefaultValue.efficacy = 0;
+                newReactiveValue.suitability = 0;
               }
             }
-            newDefaultValue.type = "behaviors";
-            default_values.push_back(newDefaultValue);
+            newReactiveValue.type = "behaviors";
+            default_values.push_back(newReactiveValue);
           }
         }
       }
@@ -95,10 +95,10 @@ Catalog::Catalog(std::string path_file){
             }
             if(!taskFound){
               Task newTask((*behaviorsIterator)["task"].as<std::string>());
-              for(std::list<DefaultValue>::iterator defaultValuesIterator = default_values.begin();
-              defaultValuesIterator != default_values.end(); ++defaultValuesIterator){
-                if(defaultValuesIterator->type == "tasks"){
-                  newTask.timeout = defaultValuesIterator->timeout;
+              for(std::list<ReactiveValue>::iterator reactive_startValuesIterator = default_values.begin();
+              reactive_startValuesIterator != default_values.end(); ++reactive_startValuesIterator){
+                if(reactive_startValuesIterator->type == "tasks"){
+                  newTask.timeout = reactive_startValuesIterator->timeout;
                   break;
                 }
               }
@@ -120,14 +120,14 @@ Catalog::Catalog(std::string path_file){
           if((*behaviorsIterator)["package"]){
             newBehavior.package = (*behaviorsIterator)["package"].as<std::string>();
           }
-          if((*behaviorsIterator)["efficacy"]){
-            newBehavior.efficacy = (*behaviorsIterator)["efficacy"].as<double>()/100;
+          if((*behaviorsIterator)["suitability"]){
+            newBehavior.suitability = (*behaviorsIterator)["suitability"].as<double>()/100;
           }
           else{
-            for(std::list<DefaultValue>::iterator defaultValuesIterator = default_values.begin();
-            defaultValuesIterator != default_values.end(); ++defaultValuesIterator){
-              if(defaultValuesIterator->type == "behaviors"){
-                newBehavior.efficacy = defaultValuesIterator->efficacy;
+            for(std::list<ReactiveValue>::iterator reactive_startValuesIterator = default_values.begin();
+            reactive_startValuesIterator != default_values.end(); ++reactive_startValuesIterator){
+              if(reactive_startValuesIterator->type == "behaviors"){
+                newBehavior.suitability = reactive_startValuesIterator->suitability;
                 break;
               }
             }
@@ -152,14 +152,14 @@ Catalog::Catalog(std::string path_file){
               task=&(newTask);
             }
           }
-          if((*tasksIterator)["automatic_activation"]){
-            task->automaticActivation = (*tasksIterator)["automatic_activation"].as<std::string>() == "TRUE";
+          if((*tasksIterator)["start_on_request"]){
+            task->startOnRequest = (*tasksIterator)["start_on_request"].as<std::string>() == "TRUE";
           }
           else{
-            for(std::list<DefaultValue>::iterator defaultValuesIterator = default_values.begin();
-            defaultValuesIterator != default_values.end(); ++defaultValuesIterator){
-              if(defaultValuesIterator->type == "tasks"){
-                task->automaticActivation = defaultValuesIterator->automatic_activation;
+            for(std::list<ReactiveValue>::iterator reactive_startValuesIterator = default_values.begin();
+            reactive_startValuesIterator != default_values.end(); ++reactive_startValuesIterator){
+              if(reactive_startValuesIterator->type == "tasks"){
+                task->startOnRequest = reactive_startValuesIterator->start_on_request;
                 break;
               }
             }
@@ -168,28 +168,28 @@ Catalog::Catalog(std::string path_file){
             task->timeout = (*tasksIterator)["timeout"].as<int>();
           }
           else{
-            for(std::list<DefaultValue>::iterator defaultValuesIterator = default_values.begin();
-            defaultValuesIterator != default_values.end(); ++defaultValuesIterator){
-              if(defaultValuesIterator->type == "tasks"){
-                task->timeout = defaultValuesIterator->timeout;
+            for(std::list<ReactiveValue>::iterator reactive_startValuesIterator = default_values.begin();
+            reactive_startValuesIterator != default_values.end(); ++reactive_startValuesIterator){
+              if(reactive_startValuesIterator->type == "tasks"){
+                task->timeout = reactive_startValuesIterator->timeout;
                 break;
               }
             }
           }
-          if((*tasksIterator)["default"]){
-            task->isDefault = (*tasksIterator)["default"].as<std::string>() == "TRUE";
+          if((*tasksIterator)["reactive_start"]){
+            task->isReactive_started = (*tasksIterator)["reactive_start"].as<std::string>() == "TRUE";
           }
           else{
-            for(std::list<DefaultValue>::iterator defaultValuesIterator = default_values.begin();
-            defaultValuesIterator != default_values.end(); ++defaultValuesIterator){
-              if(defaultValuesIterator->type == "tasks"){
-                task->isDefault = defaultValuesIterator->default_value;
+            for(std::list<ReactiveValue>::iterator reactive_startValuesIterator = default_values.begin();
+            reactive_startValuesIterator != default_values.end(); ++reactive_startValuesIterator){
+              if(reactive_startValuesIterator->type == "tasks"){
+                task->isReactive_started = reactive_startValuesIterator->reactive_start_value;
                 break;
               }
             }
           }
-          if((*tasksIterator)["category"]){
-            task->category = (*tasksIterator)["category"].as<std::string>();
+          if((*tasksIterator)["execution_goal"]){
+            task->execution_goal = (*tasksIterator)["execution_goal"].as<std::string>();
           }
           if((*tasksIterator)["parameters"]){
             for (YAML::const_iterator parametersIterator=(*tasksIterator)["parameters"].begin();
@@ -203,6 +203,9 @@ Catalog::Catalog(std::string path_file){
               }
               task->parameters.push_back(parameter);
             }
+          }
+          if(task->startOnRequest && task->isReactive_started){
+            errors.push_back("The task: " + task->name + " has incompatible fields start_on_request: TRUE and reactive_start: TRUE (reactive_start: FALSE is required for this configuration)");
           }
         }
       }
@@ -449,7 +452,7 @@ void Catalog::printDebugInfo(){
 
   std::cout<<"[BEHAVIORS]"<<std::endl;
   for (std::list<Behavior>::iterator behaviorsit = behaviors.begin(); behaviorsit != behaviors.end(); ++behaviorsit){
-    std::cout<<"  "<<behaviorsit->name<<", "<<behaviorsit->efficacy<<" (task: "<<behaviorsit->task->name<<")"<<std::endl;
+    std::cout<<"  "<<behaviorsit->name<<", "<<behaviorsit->suitability<<" (task: "<<behaviorsit->task->name<<")"<<std::endl;
   }
 }
 void Catalog::printValues(){

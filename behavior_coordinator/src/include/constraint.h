@@ -110,7 +110,7 @@ public:
   Behavior* getRequiringBehavior();
   Task* getRequiredTask();
   RequirementConstraint* generateAssignmentExplainingViolation();
-  double getMaxEfficacyValue(Task* taskIterator);
+  double getMaxSuitabilityValue(Task* taskIterator);
   bool checkTaskInConstraint(Task* task);
   bool hasTask(Task* task);
 

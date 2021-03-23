@@ -163,15 +163,15 @@ bool RequirementConstraint::checkTaskInConstraint(Task* task){
   return false;
 }
 
-double RequirementConstraint::getMaxEfficacyValue(Task* taskIterator){
-  double maxEfficacyValue = 0;
+double RequirementConstraint::getMaxSuitabilityValue(Task* taskIterator){
+  double maxSuitabilityValue = 0;
   for(std::list<Behavior*>::iterator domainIterator = taskIterator->domain.begin();
   domainIterator != taskIterator->domain.end(); ++domainIterator){
-    if((*domainIterator)->efficacy > maxEfficacyValue){
-      maxEfficacyValue = (*domainIterator)->efficacy;
+    if((*domainIterator)->suitability > maxSuitabilityValue){
+      maxSuitabilityValue = (*domainIterator)->suitability;
     }
   }
-  return maxEfficacyValue;
+  return maxSuitabilityValue;
 }
 
 bool RequirementConstraint::checkConstraint(){
@@ -195,7 +195,7 @@ Task* RequirementConstraint::revise(){
     if(requiringBehavior->task->domain.size() == 1 && requiringBehavior->task->domain.front() == requiringBehavior){
       for (std::list<Behavior*>::iterator domainit = requiredTask->domain.begin();
       domainit != requiredTask->domain.end(); ++domainit){
-        if((*domainit)->efficacy < requiredPerformance || (*domainit) == requiredTask->inactive){
+        if((*domainit)->suitability < requiredPerformance || (*domainit) == requiredTask->inactive){
           domainit=requiredTask->domain.erase(domainit);
           return requiredTask;
         }
@@ -203,7 +203,7 @@ Task* RequirementConstraint::revise(){
     }
   }
   else{
-    if(requiredPerformance != 0 && getMaxEfficacyValue(requiredTask) < requiredPerformance){
+    if(requiredPerformance != 0 && getMaxSuitabilityValue(requiredTask) < requiredPerformance){
       for(std::list<Behavior*>::iterator domainit = requiringBehavior->task->domain.begin();
       domainit != requiringBehavior->task->domain.end();domainit++){
         if((*domainit) == requiringBehavior){

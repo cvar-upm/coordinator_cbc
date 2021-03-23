@@ -92,10 +92,10 @@ void Task::calculatePerformance(){
   if(!performanceCalculated){
     performanceCalculated = true;
     if(assignment->name == "inactive"){
-      performance = assignment->efficacy;
+      performance = assignment->suitability;
     }
     else{
-      performance = assignment->efficacy*obtainPerformanceOfRequiredTasks()/100;
+      performance = assignment->suitability*obtainPerformanceOfRequiredTasks()/100;
     }
   }
 }
@@ -152,10 +152,10 @@ void Task::printIncompatibleTasks(){
   }
 }
 
-void Task::printIncompatibleDefaultTasks(){
+void Task::printIncompatibleReactiveTasks(){
   std::cout<<name<<std::endl;
-  for(std::list<Task*>::iterator incompatibleDefaultTasksIterator = incompatibleDefaultTasks.begin();
-  incompatibleDefaultTasksIterator != incompatibleDefaultTasks.end(); ++incompatibleDefaultTasksIterator){
-    std::cout<<"  "<<(*incompatibleDefaultTasksIterator)->name<<std::endl;
+  for(std::list<Task*>::iterator incompatibleReactiveTasksIterator = incompatibleReactiveTasks.begin();
+  incompatibleReactiveTasksIterator != incompatibleReactiveTasks.end(); ++incompatibleReactiveTasksIterator){
+    std::cout<<"  "<<(*incompatibleReactiveTasksIterator)->name<<std::endl;
   }
 }

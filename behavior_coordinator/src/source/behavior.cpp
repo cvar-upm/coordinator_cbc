@@ -41,7 +41,7 @@ Behavior::Behavior(){
   private_nh.shutdown();
 }
 
-Behavior::Behavior(std::string arg_name,bool arg_active,Task* arg_task,double arg_efficacy){
+Behavior::Behavior(std::string arg_name,bool arg_active,Task* arg_task,double arg_suitability){
   ros::NodeHandle private_nh;
   private_nh.getParam("robot_id", robot_id);
   private_nh.getParam("robot_namespace", robot_namespace);
@@ -50,7 +50,7 @@ Behavior::Behavior(std::string arg_name,bool arg_active,Task* arg_task,double ar
   name=arg_name;
   active=arg_active;
   task=arg_task;
-  efficacy=arg_efficacy;
+  suitability=arg_suitability;
 }
 
 bool Behavior::activate(){

@@ -51,9 +51,8 @@ public:
 
   //DRIVE
   std::string name;
-  std::string category;
-  bool isDefault = false;
-  bool defaultActivated = false;
+  std::string execution_goal;
+  bool isReactive_started = false;
   bool requested = false;
   int change_type;
   std::list<std::pair<std::string,std::string>> parameters;
@@ -61,7 +60,7 @@ public:
   bool active = false;
   std::list<Behavior*> candidateBehaviors;
   Behavior* inactive;
-  bool automaticActivation = true;
+  bool startOnRequest = true;
   Behavior* activeBehavior;
   std::list<Behavior*> initialDomain;
   std::list<Behavior*> domain;
@@ -73,7 +72,7 @@ public:
   std::list<Constraint*> mainInConstraints;
   std::list<Constraint*> secondaryInConstraints;
   Constraint* performanceViolation;
-  std::list<Task*> incompatibleDefaultTasks;
+  std::list<Task*> incompatibleReactiveTasks;
   std::list<Task*> incompatibleTasks;
   std::list<Task*> requiredTasks;
   std::chrono::system_clock::time_point activationTime;
@@ -88,7 +87,7 @@ public:
   void calculatePerformance();
   int obtainPerformanceOfRequiredTasks();
   void printIncompatibleTasks();
-  void printIncompatibleDefaultTasks();
+  void printIncompatibleReactiveTasks();
 private:
 };
 

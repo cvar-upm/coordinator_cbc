@@ -45,7 +45,7 @@ class Behavior
 {
 public:
   Behavior();
-  Behavior(std::string arg_name,bool active,Task* task,double efficacy);
+  Behavior(std::string arg_name,bool active,Task* task,double suitability);
 
   ros::NodeHandle nh;
 
@@ -62,7 +62,7 @@ public:
   bool nodeIsActive = true;
   bool active;
   Task* task;
-  double efficacy = 0;
+  double suitability = 0;
   std::string check_situation_str;
   ros::ServiceClient checkSituation_srv;
   std::string robot_id;

@@ -106,7 +106,7 @@ void BehaviorCoordinator::publishListOfRunningTasks(){
 void BehaviorCoordinator::checkTimeouts(){
   if(!first_call){
     for (std::list<Task*>::iterator tasksIterator = catalog->tasks.begin(); tasksIterator != catalog->tasks.end(); ++tasksIterator){
-      if((*tasksIterator)->active && (*tasksIterator)->category != "recurrent"
+      if((*tasksIterator)->active && (*tasksIterator)->execution_goal != "keep_running"
       && std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - (*tasksIterator)->activationTime).count() > (*tasksIterator)->timeout){
         std::cout<<"[Timeout expired]"<<std::endl;
         for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin();
@@ -135,34 +135,34 @@ void BehaviorCoordinator::deactivateBehaviorFailed(Behavior behavior){
   behavior.task->active = false;
 }
 
-void BehaviorCoordinator::checkDefaultActivations(){
-  if(defaultTasksToActivate.size()>0){
-    std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-    while(defaultTasksToActivateIterator != defaultTasksToActivate.end()){
-      if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - defaultTasksToActivateIterator->second).count()>DEFAULT_ACTIVATION_DELAY){
+void BehaviorCoordinator::checkReactiveStarts(){
+  if(reactiveTasksToStart.size()>0){
+    std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+    while(reactiveTasksToStartIterator != reactiveTasksToStart.end()){
+      if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - reactiveTasksToStartIterator->second).count()>DEFAULT_ACTIVATION_DELAY){
         std::pair<Task*, std::list<Behavior*>> desiredDomain;
-        desiredDomain.first = defaultTasksToActivateIterator->first;
+        desiredDomain.first = reactiveTasksToStartIterator->first;
         desiredDomain.second.clear();
-        std::cout<<"[Default activation]"<<std::endl;
-        defaultTasksToActivateIterator->first->defaultActivated = true;
-        defaultTasksToActivateIterator->first->priority = 1;
-        defaultTasksToActivateIterator->second = std::chrono::system_clock::now();
-        std::cout<<"  "<<desiredDomain.first->name<<" (priority: "<< defaultTasksToActivateIterator->first->priority<<")"<<std::endl;
-        for (std::list<Behavior*>::iterator behaviorsIterator = defaultTasksToActivateIterator->first->candidateBehaviors.begin();
-        behaviorsIterator != defaultTasksToActivateIterator->first->candidateBehaviors.end(); ++behaviorsIterator){
-          if(*behaviorsIterator != defaultTasksToActivateIterator->first->inactive){
+        std::cout<<"[Reactive activation]"<<std::endl;
+        reactiveTasksToStartIterator->first->isReactive_started = true;
+        reactiveTasksToStartIterator->first->priority = 1;
+        reactiveTasksToStartIterator->second = std::chrono::system_clock::now();
+        std::cout<<"  "<<desiredDomain.first->name<<" (priority: "<< reactiveTasksToStartIterator->first->priority<<")"<<std::endl;
+        for (std::list<Behavior*>::iterator behaviorsIterator = reactiveTasksToStartIterator->first->candidateBehaviors.begin();
+        behaviorsIterator != reactiveTasksToStartIterator->first->candidateBehaviors.end(); ++behaviorsIterator){
+          if(*behaviorsIterator != reactiveTasksToStartIterator->first->inactive){
             desiredDomain.second.push_back(*behaviorsIterator);
           }
         }
-        std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator test = defaultTasksToActivateIterator;
+        std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator test = reactiveTasksToStartIterator;
         test++;
         if(!generateAndExecuteAssignment(1,desiredDomain)){
-          defaultTasksToActivateIterator=defaultTasksToActivate.erase(defaultTasksToActivateIterator);
+          reactiveTasksToStartIterator=reactiveTasksToStart.erase(reactiveTasksToStartIterator);
         }
-        defaultTasksToActivateIterator=test;
+        reactiveTasksToStartIterator=test;
       }
       else{
-        defaultTasksToActivateIterator++;
+        reactiveTasksToStartIterator++;
       }
     }
   }
@@ -217,7 +217,7 @@ bool BehaviorCoordinator::activateTaskCallback(behavior_coordinator_msgs::StartT
       if(deactivateBehavior(*requestedTask->activeBehavior) && activateBehavior(reactivate_behavior, requestedTask->arguments, int(request.task.priority))){
         reactivate_behavior->task->change_type = behavior_coordinator_msgs::ActivationChange::REQUESTED_DEACTIVATION;
         response.ack = true;
-        removeDefaultTask(requestedTask);
+        removeReactiveTask(requestedTask);
         return true;
       }
     }
@@ -244,21 +244,21 @@ bool BehaviorCoordinator::activateTaskCallback(behavior_coordinator_msgs::StartT
     response.behavior.push_back((*lastAssignmentIterator)->name);
   }
   if(response.ack){
-    removeDefaultTask(requestedTask);
+    removeReactiveTask(requestedTask);
   }
   return true;
 }
 
-void BehaviorCoordinator::removeDefaultTask(Task * requestedTask){
+void BehaviorCoordinator::removeReactiveTask(Task * requestedTask){
   for(std::list<Task*>::iterator incompatibleTasksIterator = requestedTask->incompatibleTasks.begin();
   incompatibleTasksIterator != requestedTask->incompatibleTasks.end(); ++incompatibleTasksIterator){
-    std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-    while(defaultTasksToActivateIterator != defaultTasksToActivate.end()){
-      if(defaultTasksToActivateIterator->first == *incompatibleTasksIterator){
-        defaultTasksToActivateIterator = defaultTasksToActivate.erase(defaultTasksToActivateIterator);
+    std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+    while(reactiveTasksToStartIterator != reactiveTasksToStart.end()){
+      if(reactiveTasksToStartIterator->first == *incompatibleTasksIterator){
+        reactiveTasksToStartIterator = reactiveTasksToStart.erase(reactiveTasksToStartIterator);
       }
       else{
-        defaultTasksToActivateIterator++;
+        reactiveTasksToStartIterator++;
       }
     }
   }
@@ -322,7 +322,7 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
             std::cout<<" (UNKNOWN_DEACTIVATION)"<<std::endl;
             (*lastAssignmentIterator)->task->change_type = behavior_coordinator_msgs::ActivationChange::UNKNOWN_DEACTIVATION;
             break;
-        default:
+        reactive_start:
             std::cout<<message.error_message;
       }
       behavior_coordinator_msgs::ActivationChange activation_change_msg;
@@ -334,24 +334,24 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
       activation_change_pub.publish(activation_change_msg);
       (*lastAssignmentIterator)->task->change_type = -1;
       bool found = false;
-      for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleDefaultTasks.begin();
-        incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleDefaultTasks.end(); ++incompatibleTasksIterator){
-          bool defaultTaskWaiting = false;
-          for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-          defaultTasksToActivateIterator != defaultTasksToActivate.end(); ++defaultTasksToActivateIterator){
-            if(defaultTasksToActivateIterator->first == *incompatibleTasksIterator && !(*incompatibleTasksIterator)->active){
-              defaultTaskWaiting = true;
+      for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleReactiveTasks.begin();
+        incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleReactiveTasks.end(); ++incompatibleTasksIterator){
+          bool reactive_startTaskWaiting = false;
+          for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+          reactiveTasksToStartIterator != reactiveTasksToStart.end(); ++reactiveTasksToStartIterator){
+            if(reactiveTasksToStartIterator->first == *incompatibleTasksIterator && !(*incompatibleTasksIterator)->active){
+              reactive_startTaskWaiting = true;
             }
           }
-          if(!defaultTaskWaiting){
+          if(!reactive_startTaskWaiting){
             std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>> newTask(*incompatibleTasksIterator,std::chrono::system_clock::now());
-            defaultTasksToActivate.push_back(newTask);
+            reactiveTasksToStart.push_back(newTask);
           }
         }
-        for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-        defaultTasksToActivateIterator != defaultTasksToActivate.end(); ++defaultTasksToActivateIterator){
-          if(defaultTasksToActivateIterator->first == (*lastAssignmentIterator)->task){
-            defaultTasksToActivate.erase(defaultTasksToActivateIterator);
+        for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+        reactiveTasksToStartIterator != reactiveTasksToStart.end(); ++reactiveTasksToStartIterator){
+          if(reactiveTasksToStartIterator->first == (*lastAssignmentIterator)->task){
+            reactiveTasksToStart.erase(reactiveTasksToStartIterator);
             break;
           }
         }
@@ -450,7 +450,7 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
   if(behavior->task->requested == true){
     activation_change_msg.change_type = behavior_coordinator_msgs::ActivationChange::REQUESTED_ACTIVATION;
   }
-  else if(behavior->task->defaultActivated == true){
+  else if(behavior->task->isReactive_started == true){
     activation_change_msg.change_type = behavior_coordinator_msgs::ActivationChange::DEFAULT_ACTIVATION;
   }
   else{
@@ -472,24 +472,24 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
   behavior->task->activeBehavior = behavior;
   for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin(); lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
     if(behavior->name == (*lastAssignmentIterator)->name){
-      for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleDefaultTasks.begin();
-      incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleDefaultTasks.end(); ++incompatibleTasksIterator){
-        bool defaultTaskWaiting = false;
-        for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-        defaultTasksToActivateIterator != defaultTasksToActivate.end(); ++defaultTasksToActivateIterator){
-          if(defaultTasksToActivateIterator->first == *incompatibleTasksIterator && !(*incompatibleTasksIterator)->active){
-            defaultTaskWaiting = true;
+      for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleReactiveTasks.begin();
+      incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleReactiveTasks.end(); ++incompatibleTasksIterator){
+        bool reactive_startTaskWaiting = false;
+        for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+        reactiveTasksToStartIterator != reactiveTasksToStart.end(); ++reactiveTasksToStartIterator){
+          if(reactiveTasksToStartIterator->first == *incompatibleTasksIterator && !(*incompatibleTasksIterator)->active){
+            reactive_startTaskWaiting = true;
           }
         }
-        if(!defaultTaskWaiting){
+        if(!reactive_startTaskWaiting){
           std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>> newTask(*incompatibleTasksIterator,std::chrono::system_clock::now());
-          defaultTasksToActivate.push_back(newTask);
+          reactiveTasksToStart.push_back(newTask);
         }
       }
-      for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-      defaultTasksToActivateIterator != defaultTasksToActivate.end(); ++defaultTasksToActivateIterator){
-        if(defaultTasksToActivateIterator->first == (*lastAssignmentIterator)->task){
-          defaultTasksToActivate.erase(defaultTasksToActivateIterator);
+      for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+      reactiveTasksToStartIterator != reactiveTasksToStart.end(); ++reactiveTasksToStartIterator){
+        if(reactiveTasksToStartIterator->first == (*lastAssignmentIterator)->task){
+          reactiveTasksToStart.erase(reactiveTasksToStartIterator);
           break;
         }
       }
@@ -498,14 +498,14 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
   }
   for(std::list<Task*>::iterator incompatibleTasksIterator = behavior->task->incompatibleTasks.begin();
   incompatibleTasksIterator != behavior->task->incompatibleTasks.end(); ++incompatibleTasksIterator){
-    std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-    while(defaultTasksToActivateIterator != defaultTasksToActivate.end()){
-      if(defaultTasksToActivateIterator->first == *incompatibleTasksIterator || defaultTasksToActivateIterator->first == behavior->task){
-        defaultTasksToActivateIterator = defaultTasksToActivate.erase(defaultTasksToActivateIterator);
+    std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+    while(reactiveTasksToStartIterator != reactiveTasksToStart.end()){
+      if(reactiveTasksToStartIterator->first == *incompatibleTasksIterator || reactiveTasksToStartIterator->first == behavior->task){
+        reactiveTasksToStartIterator = reactiveTasksToStart.erase(reactiveTasksToStartIterator);
         break;
       }
       else{
-        defaultTasksToActivateIterator++;
+        reactiveTasksToStartIterator++;
       }
     }
   }
@@ -569,24 +569,24 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
       task_stopped_msg.name = (*lastAssignmentIterator)->task->name;
       task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
       task_stopped_pub.publish(task_stopped_msg);
-      for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleDefaultTasks.begin();
-      incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleDefaultTasks.end(); ++incompatibleTasksIterator){
-        bool defaultTaskWaiting = false;
-        for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-        defaultTasksToActivateIterator != defaultTasksToActivate.end(); ++defaultTasksToActivateIterator){
-          if(defaultTasksToActivateIterator->first == *incompatibleTasksIterator && !(*incompatibleTasksIterator)->active){
-            defaultTaskWaiting = true;
+      for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleReactiveTasks.begin();
+      incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleReactiveTasks.end(); ++incompatibleTasksIterator){
+        bool reactive_startTaskWaiting = false;
+        for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+        reactiveTasksToStartIterator != reactiveTasksToStart.end(); ++reactiveTasksToStartIterator){
+          if(reactiveTasksToStartIterator->first == *incompatibleTasksIterator && !(*incompatibleTasksIterator)->active){
+            reactive_startTaskWaiting = true;
           }
         }
-        if(!defaultTaskWaiting){
+        if(!reactive_startTaskWaiting){
           std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>> newTask(*incompatibleTasksIterator,std::chrono::system_clock::now());
-          defaultTasksToActivate.push_back(newTask);
+          reactiveTasksToStart.push_back(newTask);
         }
       }
-      for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator defaultTasksToActivateIterator = defaultTasksToActivate.begin();
-      defaultTasksToActivateIterator != defaultTasksToActivate.end(); ++defaultTasksToActivateIterator){
-        if(defaultTasksToActivateIterator->first == (*lastAssignmentIterator)->task){
-          defaultTasksToActivate.erase(defaultTasksToActivateIterator);
+      for(std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
+      reactiveTasksToStartIterator != reactiveTasksToStart.end(); ++reactiveTasksToStartIterator){
+        if(reactiveTasksToStartIterator->first == (*lastAssignmentIterator)->task){
+          reactiveTasksToStart.erase(reactiveTasksToStartIterator);
           break;
         }
       }
@@ -629,10 +629,10 @@ bool BehaviorCoordinator::generateBestAssignment(int priority, std::pair<Task*, 
   auto startInitializeSearch = std::chrono::system_clock::now();
   initializeSearch(priority, desiredDomain);
   int InitializeTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now()-startInitializeSearch).count();
-/*
+  /*
   std::cout<<"[Result of initializeSearch()]"<<std::endl;
   catalog->printInitialDomain();
-*/
+  */
   unsigned long long int searchSpaceSize = 1;
   unsigned long long int CatalogSearchSpaceSize = 1;
   bool possibleOverflow = true;
@@ -658,7 +658,7 @@ bool BehaviorCoordinator::generateBestAssignment(int priority, std::pair<Task*, 
     std::cout << std::endl;
   }
   int bestPerformance = -1;
-  double bestValueObjectiveFunctionMaxEfficacy = -1;
+  double bestValueObjectiveFunctionMaxSuitability = -1;
   double bestEvaluateObjectiveFunction1MinChanges = 100;
   double bestValueObjectiveFunction2 = -1;
   bool assignmentFound =false;
@@ -672,26 +672,26 @@ bool BehaviorCoordinator::generateBestAssignment(int priority, std::pair<Task*, 
       if(checkAssignmentFound()){
         assignmentFound = true;
         double valueObjectiveFunction1MinChanges;
-        double valueObjectiveFunctionMaxEfficacy = evaluateObjectiveFunction1MaxEfficacy();
+        double valueObjectiveFunctionMaxSuitability = evaluateObjectiveFunction1MaxSuitability();
         //valueObjectiveFunction1MinChanges = evaluateObjectiveFunction1MinActive();
         valueObjectiveFunction1MinChanges = evaluateObjectiveFunction1MinChanges();
         double valueObjectiveFunction2 = evaluateObjectiveFunction2();
         if(valueObjectiveFunction1MinChanges < bestEvaluateObjectiveFunction1MinChanges){
           retrieveAssignment(bestBehaviorAssignment); // Delete the previous list
-          bestValueObjectiveFunctionMaxEfficacy = valueObjectiveFunctionMaxEfficacy;
+          bestValueObjectiveFunctionMaxSuitability = valueObjectiveFunctionMaxSuitability;
           bestValueObjectiveFunction2 = valueObjectiveFunction2;
           bestEvaluateObjectiveFunction1MinChanges = valueObjectiveFunction1MinChanges;
         }
         else if(valueObjectiveFunction1MinChanges == bestEvaluateObjectiveFunction1MinChanges){
-          if(valueObjectiveFunctionMaxEfficacy > bestValueObjectiveFunctionMaxEfficacy){
+          if(valueObjectiveFunctionMaxSuitability > bestValueObjectiveFunctionMaxSuitability){
             retrieveAssignment(bestBehaviorAssignment); // Delete the previous list
-            bestValueObjectiveFunctionMaxEfficacy = valueObjectiveFunctionMaxEfficacy;
+            bestValueObjectiveFunctionMaxSuitability = valueObjectiveFunctionMaxSuitability;
             bestValueObjectiveFunction2 = valueObjectiveFunction2;
             bestEvaluateObjectiveFunction1MinChanges = valueObjectiveFunction1MinChanges;
           }
-          else if (valueObjectiveFunctionMaxEfficacy == bestValueObjectiveFunctionMaxEfficacy && valueObjectiveFunction2 > bestValueObjectiveFunction2){
+          else if (valueObjectiveFunctionMaxSuitability == bestValueObjectiveFunctionMaxSuitability && valueObjectiveFunction2 > bestValueObjectiveFunction2){
             retrieveAssignment(bestBehaviorAssignment); // Delete the previous list
-            bestValueObjectiveFunctionMaxEfficacy = valueObjectiveFunctionMaxEfficacy;
+            bestValueObjectiveFunctionMaxSuitability = valueObjectiveFunctionMaxSuitability;
             bestValueObjectiveFunction2 = valueObjectiveFunction2;
             bestEvaluateObjectiveFunction1MinChanges = valueObjectiveFunction1MinChanges;
           }
@@ -711,13 +711,13 @@ bool BehaviorCoordinator::generateAssignment(){
   loadTasksConstraints();
   //std::cout<<arcs.size()<<" , "<<agendaG.size()<<std::endl;
   if (generateConsistentAssignment()){
+    /*
+    std::cout<<"[Result of generateConsistentAssignment()]"<<std::endl;
+    catalog->printValues();
+    */
     if (testPerformanceConstraints()){
       std::list<std::pair<Task, std::list<Behavior*>>> assignment;
       retrieveAssignment(assignment);
-      /*
-      std::cout<<"[Result of retrieveAssignment()]"<<std::endl;
-      catalog->printValues();
-      */
       addNoGood(assignment);
       return true;
     }
@@ -810,13 +810,13 @@ void BehaviorCoordinator::initializeSearch(int priority, std::pair<Task*, std::l
     if((*tasksIterator)->active){
       if((*tasksIterator)->priority > priority){
         (*tasksIterator)->setInitialDomainWithSingleBehavior();
-        if(priority > (*tasksIterator)->priority && !(*tasksIterator)->automaticActivation){
+        if(priority > (*tasksIterator)->priority && (*tasksIterator)->startOnRequest){
           (*tasksIterator)->initialDomain.push_back((*tasksIterator)->inactive);
         }
       }
     }
     else{
-      if(!(*tasksIterator)->automaticActivation){
+      if((*tasksIterator)->startOnRequest){
         (*tasksIterator)->setInitialDomainWithSingleInactiveValue();
       }
     }
@@ -912,11 +912,11 @@ bool BehaviorCoordinator::testPerformanceConstraints(){
   return true;
 }
 
-double BehaviorCoordinator::evaluateObjectiveFunction1MinActive(){ //This function minimizes the number of active tasks for the maximum efficacy
+double BehaviorCoordinator::evaluateObjectiveFunction1MinActive(){ //This function minimizes the number of active tasks for the maximum suitability
   double result = 1;
   for (std::list<Task*>::iterator tasksIterator = catalog->tasks.begin(); tasksIterator != catalog->tasks.end(); ++tasksIterator){
-    if(!(*tasksIterator)->domain.front()->efficacy == 0){
-      result = result * (*tasksIterator)->domain.front()->efficacy;
+    if(!(*tasksIterator)->domain.front()->suitability == 0){
+      result = result * (*tasksIterator)->domain.front()->suitability;
     }
   }
   return result;
@@ -939,12 +939,12 @@ double BehaviorCoordinator::evaluateObjectiveFunction1MinChanges(){ //This funct
   return changes;
 }
 
-double BehaviorCoordinator::evaluateObjectiveFunction1MaxEfficacy(){ //This function maximizes global efficacy
+double BehaviorCoordinator::evaluateObjectiveFunction1MaxSuitability(){ //This function maximizes global suitability
   double result = 1;
   bool nonInactiveValueExists = false;
   for (std::list<Task*>::iterator tasksIterator = catalog->tasks.begin(); tasksIterator != catalog->tasks.end(); ++tasksIterator){
-    if(!(*tasksIterator)->domain.front()->efficacy == 0){
-      result = result * (*tasksIterator)->domain.front()->efficacy;
+    if(!(*tasksIterator)->domain.front()->suitability == 0){
+      result = result * (*tasksIterator)->domain.front()->suitability;
       nonInactiveValueExists = true;
     }
   }
@@ -1034,17 +1034,17 @@ void BehaviorCoordinator::retrieveAssignment(std::list<std::pair<Task, std::list
 
 void BehaviorCoordinator::calculateTasksPerformance(){
   for (std::list<Task*>::iterator tasksIterator = catalog->tasks.begin(); tasksIterator != catalog->tasks.end(); ++tasksIterator){
-    double maxEfficacy = -1;
+    double maxSuitability = -1;
     for (std::list<Behavior*>::iterator domainIterator = (*tasksIterator)->domain.begin(); domainIterator != (*tasksIterator)->domain.end(); ++domainIterator){
-      if((*domainIterator)->efficacy > maxEfficacy){
-        maxEfficacy = (*domainIterator)->efficacy;
+      if((*domainIterator)->suitability > maxSuitability){
+        maxSuitability = (*domainIterator)->suitability;
       }
     }
     std::list<Behavior**> result = calculateTaskDependencies(*tasksIterator);
     for(std::list<Behavior**>::iterator resultIterator = result.begin(); resultIterator != result.end(); ++resultIterator){
-      maxEfficacy = maxEfficacy * (**resultIterator)->efficacy;
+      maxSuitability = maxSuitability * (**resultIterator)->suitability;
     }
-    (*tasksIterator)->performance = maxEfficacy*100;
+    (*tasksIterator)->performance = maxSuitability*100;
   }
 }
 
@@ -1066,30 +1066,30 @@ void BehaviorCoordinator::removeNoGoodConstraints(){
   }
 }
 
-Behavior** BehaviorCoordinator::getMaxEfficacyValue(Task* taskIterator){
-  Behavior** maxEfficacyValue = NULL;
+Behavior** BehaviorCoordinator::getMaxSuitabilityValue(Task* taskIterator){
+  Behavior** maxSuitabilityValue = NULL;
   for(std::list<Behavior*>::iterator domainIterator = taskIterator->domain.begin(); domainIterator != taskIterator->domain.end(); ++domainIterator){
-    if(maxEfficacyValue==NULL || (*domainIterator)->efficacy > (*maxEfficacyValue)->efficacy){
-      maxEfficacyValue = &*domainIterator;
+    if(maxSuitabilityValue==NULL || (*domainIterator)->suitability > (*maxSuitabilityValue)->suitability){
+      maxSuitabilityValue = &*domainIterator;
     }
   }
-  return maxEfficacyValue;
+  return maxSuitabilityValue;
 }
 
 std::list<Behavior**> BehaviorCoordinator::calculateTaskDependencies(Task* taskIterator){
   std::list<Behavior**> newList;
-  Behavior** maxEfficacyValue = getMaxEfficacyValue(taskIterator);
+  Behavior** maxSuitabilityValue = getMaxSuitabilityValue(taskIterator);
   for (std::list<Constraint*>::iterator constraintsIterator = catalog->constraints.begin(); constraintsIterator != catalog->constraints.end(); ++constraintsIterator){
     if((*constraintsIterator)->getConstraintType()==1 && taskIterator == (*constraintsIterator)->getRequiringBehavior()->task
-    && (*constraintsIterator)->getRequiringBehavior() == (*maxEfficacyValue)){
+    && (*constraintsIterator)->getRequiringBehavior() == (*maxSuitabilityValue)){
       bool alreadyListed = false;
       for(std::list<Behavior**>::iterator newListIterator = newList.begin(); newListIterator != newList.end(); ++newListIterator){
-        if(*newListIterator == getMaxEfficacyValue((*constraintsIterator)->getRequiredTask())){
+        if(*newListIterator == getMaxSuitabilityValue((*constraintsIterator)->getRequiredTask())){
           alreadyListed = true;
         }
       }
       if(!alreadyListed){
-        newList.push_front(getMaxEfficacyValue((*constraintsIterator)->getRequiredTask()));
+        newList.push_front(getMaxSuitabilityValue((*constraintsIterator)->getRequiredTask()));
         std::list<Behavior**> result = calculateTaskDependencies((*constraintsIterator)->getRequiredTask());
         for(std::list<Behavior**>::iterator resultIterator = result.begin(); resultIterator != result.end(); ++resultIterator){
           alreadyListed = false;
@@ -1118,7 +1118,43 @@ void BehaviorCoordinator::restoreDomains(std::list<std::list<Behavior*>> savedDo
 
 void BehaviorCoordinator::resetActivations(){
   bestBehaviorAssignment = resetActivationList;
-  executeAssignment();
+  std::cout<<"[Result of resetActivationList]"<<std::endl;
+  std::list<std::pair<Task, std::list<Behavior*>>> activationList;
+  std::list<std::pair<Task, std::list<Behavior*>>>::iterator reducedAssignmentIterator = bestBehaviorAssignment.begin();
+  while(reducedAssignmentIterator != bestBehaviorAssignment.end()){
+    std::cout<<reducedAssignmentIterator->first.name<<" , "<<reducedAssignmentIterator->second.front()->name<<std::endl;
+    if(reducedAssignmentIterator->second.front() == reducedAssignmentIterator->first.inactive){
+      std::cout<<"1"<<std::endl;
+      if(reducedAssignmentIterator->second.front()->task->active){
+        std::cout<<"deactivateBehavior1"<<std::endl;
+        if(!deactivateBehavior(*reducedAssignmentIterator->second.front()->task->activeBehavior)){
+          return;
+        }
+      }
+    }
+    else if(reducedAssignmentIterator->second.front()->task->active){
+      std::cout<<"deactivateBehavior2"<<std::endl;
+      deactivateBehavior(*reducedAssignmentIterator->second.front());
+      activateBehavior(reducedAssignmentIterator->second.front(),reducedAssignmentIterator->second.front()->task->arguments, reducedAssignmentIterator->second.front()->task->priority);
+      activationList.push_back(*reducedAssignmentIterator);
+    }
+    else{
+      std::cout<<"2"<<std::endl;
+      activateBehavior(reducedAssignmentIterator->second.front(),reducedAssignmentIterator->second.front()->task->arguments, reducedAssignmentIterator->second.front()->task->priority);
+      activationList.push_back(*reducedAssignmentIterator);
+    }
+    std::cout<<"salgo"<<std::endl;
+    reducedAssignmentIterator=bestBehaviorAssignment.erase(reducedAssignmentIterator);
+  }
+  for(std::list<std::pair<Task, std::list<Behavior*>>>::iterator activationListIterator = activationList.begin(); activationListIterator != activationList.end();++activationListIterator){
+    if(activateBehavior(activationListIterator->second.front(),
+    activationListIterator->second.front()->task->arguments, activationListIterator->second.front()->task->priority)){
+      activationListIterator->second.front()->task->activationTime = std::chrono::system_clock::now();
+    }
+    else{
+      return;
+    }
+  }
 }
 
 bool BehaviorCoordinator::checkAssignmentFound(){
@@ -1155,12 +1191,12 @@ Behavior* BehaviorCoordinator::selectValueToExplore(Task* tasksIterator,std::lis
         return (*domainIterator);
       }
     }
-    int maxEfficacy = -1;
+    int maxSuitability = -1;
     Behavior* bestValue;
     bool found = false;
     for (std::list<Behavior*>::iterator domainIterator = searchDomain.begin(); domainIterator != searchDomain.end(); ++domainIterator){
-      if ((*domainIterator)->efficacy > maxEfficacy){
-        maxEfficacy = (*domainIterator)->efficacy;
+      if ((*domainIterator)->suitability > maxSuitability){
+        maxSuitability = (*domainIterator)->suitability;
         bestValue = (*domainIterator);
         found = true;
       }
@@ -1215,9 +1251,9 @@ void BehaviorCoordinator::initializeIncompatibleTasks(){
             if((*constraintsit)->checkTaskInConstraint(*tasksIterator2)
             && !(std::find((*tasksIterator)->incompatibleTasks.begin(), (*tasksIterator)->incompatibleTasks.end(), *tasksIterator2) != (*tasksIterator)->incompatibleTasks.end())){
               (*tasksIterator)->incompatibleTasks.push_back(*tasksIterator2);
-              if((*tasksIterator2)->isDefault && !((*tasksIterator2)->candidateBehaviors.size()==1 &&
+              if((*tasksIterator2)->isReactive_started && !((*tasksIterator2)->candidateBehaviors.size()==1 &&
               (*tasksIterator2)->candidateBehaviors.front() == (*tasksIterator2)->inactive)){
-                (*tasksIterator)->incompatibleDefaultTasks.push_back(*tasksIterator2);
+                (*tasksIterator)->incompatibleReactiveTasks.push_back(*tasksIterator2);
               }
             }
           }

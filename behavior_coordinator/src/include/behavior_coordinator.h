@@ -72,7 +72,7 @@ public:
   Catalog* catalog;
   bool first_call = true;
   std::list<std::pair<Task, std::list<Behavior*>>> bestBehaviorAssignment;
-  std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>> defaultTasksToActivate;
+  std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>> reactiveTasksToStart;
   std::chrono::time_point<std::chrono::system_clock> startSearchTime, endSearchTime;
   std::list<std::pair<Task, std::list<Behavior*>>> resetActivationList;
   std::list<Behavior*> lastAssignment;
@@ -128,12 +128,12 @@ public:
   void resetActivations();
   void setUp();
   std::list<Behavior**> calculateTaskDependencies(Task* taskIterator);
-  Behavior** getMaxEfficacyValue(Task* taskIterator);
+  Behavior** getMaxSuitabilityValue(Task* taskIterator);
   bool checkConstraint(Constraint* constraint);
   std::list<std::pair<Task, std::list<Behavior*>>> generateAssignmentExplainingViolation(Constraint* constraint);
   double evaluateObjectiveFunction1MinActive();
   double evaluateObjectiveFunction1MinChanges();
-  double evaluateObjectiveFunction1MaxEfficacy();
+  double evaluateObjectiveFunction1MaxSuitability();
   double evaluateObjectiveFunction2();
   void loadTasksConstraints();
   bool activateBehavior(Behavior* behavior, std::string arguments, int priority);
@@ -141,10 +141,10 @@ public:
   void deactivateBehaviorFailed(Behavior behavior);
   void stopBehaviorCoordinator();
   void initializeIncompatibleTasks();
-  void checkDefaultActivations();
+  void checkReactiveStarts();
   void checkTimeouts();
   //void publishListOfRunningTasks();
-  void removeDefaultTask(Task * requestedTask);
+  void removeReactiveTask(Task * requestedTask);
 
   //DEBUG
   void printBestBehaviorAssignment();

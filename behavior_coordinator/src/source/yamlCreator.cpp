@@ -96,8 +96,7 @@ void Tester::CreateYaml(){
             lista.push_back(randomTask);
           }
         }
-        YAML::Node efficacy;
-        behavior["efficacy"] = std::to_string(std::rand()%(100 - 60 + 1) + 60);
+        behavior["suitability"] = std::to_string(std::rand()%(100 - 60 + 1) + 60);
         behavior["requires"] = requires;
         behaviors.push_back(behavior);
       }
