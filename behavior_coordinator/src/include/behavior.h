@@ -38,6 +38,7 @@
 
 // Aerostack
 #include <behavior_execution_manager_msgs/CheckSituation.h>
+#include <behavior_execution_manager_msgs/CheckActivation.h>
 
 class Task;
 
@@ -52,7 +53,8 @@ public:
   bool activate();
   bool deactivate();
   bool checkSituation();
-  void initCheckSituation();
+  bool checkActivation();
+  void initServices();
 
   //DRIVE
   std::string name;
@@ -64,7 +66,9 @@ public:
   Task* task;
   double suitability = 0;
   std::string check_situation_str;
+  std::string check_activation_str;
   ros::ServiceClient checkSituation_srv;
+  ros::ServiceClient checkActivation_srv;
   std::string robot_id;
   std::string robot_namespace;
   

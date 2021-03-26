@@ -38,6 +38,7 @@ Behavior::Behavior(){
   private_nh.getParam("robot_id", robot_id);
   private_nh.getParam("robot_namespace", robot_namespace);
   private_nh.param<std::string>("check_situation_str", check_situation_str, "check_activation_conditions");
+  private_nh.param<std::string>("check_activation_str", check_activation_str, "check_activation");
   private_nh.shutdown();
 }
 
@@ -46,6 +47,7 @@ Behavior::Behavior(std::string arg_name,bool arg_active,Task* arg_task,double ar
   private_nh.getParam("robot_id", robot_id);
   private_nh.getParam("robot_namespace", robot_namespace);
   private_nh.param<std::string>("check_situation_str", check_situation_str, "check_activation_conditions");
+  private_nh.param<std::string>("check_situation_str", check_activation_str, "check_activation");
   private_nh.shutdown();
   name=arg_name;
   active=arg_active;
@@ -63,18 +65,29 @@ bool Behavior::deactivate(){
   return true;
 }
 
-void Behavior::initCheckSituation(){
+void Behavior::initServices(){
   behavior_name_tolower = name;
   std::transform(behavior_name_tolower.begin(), behavior_name_tolower.end(), behavior_name_tolower.begin(), ::tolower);
   checkSituation_srv = nh.serviceClient<behavior_execution_manager_msgs::CheckSituation>("/" + robot_namespace + robot_id + "/" + package + "/behavior_" +
                                                                                 behavior_name_tolower + "/" + check_situation_str,true);
+  checkActivation_srv = nh.serviceClient<behavior_execution_manager_msgs::CheckActivation>("/" + robot_namespace + robot_id + "/" + package + "/behavior_" +
+                                                                                behavior_name_tolower + "/" + check_activation_str,true);
 }
 
 bool Behavior::checkSituation(){
   if(ros::service::exists("/" + robot_namespace + robot_id + "/" + package + "/behavior_" + behavior_name_tolower + "/" + check_situation_str,true)){
-    behavior_execution_manager_msgs::CheckSituation msg;
-    checkSituation_srv.call(msg);
-    return bool(msg.response.situation_occurs);
+    behavior_execution_manager_msgs::CheckSituation srv;
+    checkSituation_srv.call(srv);
+    return bool(srv.response.situation_occurs);
+  }
+  return false;
+}
+
+bool Behavior::checkActivation(){
+  if(ros::service::exists("/" + robot_namespace + robot_id + "/" + package + "/behavior_" + behavior_name_tolower + "/" + check_activation_str,true)){
+    behavior_execution_manager_msgs::CheckActivation srv;
+    checkActivation_srv.call(srv);
+    return bool(srv.response.is_active);
   }
   return false;
 }

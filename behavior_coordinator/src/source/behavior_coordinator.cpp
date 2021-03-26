@@ -439,11 +439,17 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
   activate_behavior_msg.request.timeout = 1000;
   if (!testing && !behavior_cli.call(activate_behavior_msg)){
     std::cout<<"ERROR ACTIVATING THE BEHAVIOR: "<<behavior->name<<std::endl;
-    behavior_coordinator_msgs::TaskStopped task_stopped_msg;
-    task_stopped_msg.name = behavior->task->name;
-    task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
-    task_stopped_pub.publish(task_stopped_msg);
-    return false;
+    if(behavior->checkActivation()){
+      std::cout<<"The behavior is already active, anotated"<<std::endl;
+      activate_behavior_msg.response.ack = true;
+    }
+    else{
+      behavior_coordinator_msgs::TaskStopped task_stopped_msg;
+      task_stopped_msg.name = behavior->task->name;
+      task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
+      task_stopped_pub.publish(task_stopped_msg);
+      return false;
+    }
   }
   behavior->task->activationTime = std::chrono::system_clock::now();
   behavior_coordinator_msgs::ActivationChange activation_change_msg;
@@ -1027,7 +1033,10 @@ void BehaviorCoordinator::retrieveAssignment(std::list<std::pair<Task, std::list
   for (std::list<Task*>::iterator tasksIterator = catalog->tasks.begin(); tasksIterator != catalog->tasks.end(); ++tasksIterator){
     std::pair<Task, std::list<Behavior*>> newPair;
     newPair.first=**tasksIterator;
-    newPair.second=(*tasksIterator)->domain;
+    for (std::list<Behavior*>::iterator domainIterator = (*tasksIterator)->domain.begin(); domainIterator != (*tasksIterator)->domain.end(); ++domainIterator){
+      newPair.second.push_back(*domainIterator);
+    }
+    //newPair.second=(*tasksIterator)->domain;
     assignment.push_back(newPair);
   }
 }

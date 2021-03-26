@@ -417,7 +417,7 @@ void Catalog::discardInactiveNodes(){
 
 void Catalog::loadValues(){
   for (std::list<Behavior>::iterator behaviorsit = behaviors.begin(); behaviorsit != behaviors.end(); ++behaviorsit){
-    behaviorsit->initCheckSituation();
+    behaviorsit->initServices();
     Behavior* newValue(&(*behaviorsit));
     for (std::list<Task*>::iterator tasksIterator = tasks.begin(); tasksIterator != tasks.end(); ++tasksIterator){
       if((*tasksIterator)->name == behaviorsit->task->name){
