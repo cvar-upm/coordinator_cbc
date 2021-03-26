@@ -12,6 +12,3 @@ Behavior coordination is done using an algorithm for constraint-based configurat
 You can find more information about **Behavior Coordinator CBC** in this publication:
 
 - Martin  Molina,  Pablo  Santamaria (2021). [Behavior coordination for self-adaptive robots using constraint-based configuration](https://arxiv.org/abs/2103.13128).  Arxiv  preprint arXiv:2103.13128.
-
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/KNUORQHR2nY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
