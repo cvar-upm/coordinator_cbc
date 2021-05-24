@@ -387,7 +387,28 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
         lastAssignment.push_back((*lastAssignmentIterator)->task->inactive);
         behavior_coordinator_msgs::TaskStopped task_stopped_msg;
         task_stopped_msg.name = (*lastAssignmentIterator)->task->name;
-        task_stopped_msg.termination_cause = message.termination_cause;
+        switch(message.termination_cause){
+        case behavior_execution_manager_msgs::BehaviorActivationFinished::GOAL_ACHIEVED:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::GOAL_ACHIEVED;
+            break;
+        case behavior_execution_manager_msgs::BehaviorActivationFinished::TIME_OUT:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::TIME_OUT;
+            break;
+        case behavior_execution_manager_msgs::BehaviorActivationFinished::WRONG_PROGRESS:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::WRONG_PROGRESS;
+            break;
+        case behavior_execution_manager_msgs::BehaviorActivationFinished::SITUATION_CHANGE:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::SITUATION_CHANGE;
+            break;
+        case behavior_execution_manager_msgs::BehaviorActivationFinished::PROCESS_FAILURE:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::PROCESS_FAILURE;
+            break;
+        case behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
+            break;
+        default:
+            task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::UNKNOWN;
+        }
         task_stopped_pub.publish(task_stopped_msg);
         desiredDomain.first = (*lastAssignmentIterator)->task;
         desiredDomain.second.clear();
@@ -446,7 +467,7 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
     else{
       behavior_coordinator_msgs::TaskStopped task_stopped_msg;
       task_stopped_msg.name = behavior->task->name;
-      task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
+      task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
       task_stopped_pub.publish(task_stopped_msg);
       return false;
     }
@@ -539,7 +560,7 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
     std::cout<<"Behavior: [" + behavior.name + "] is not executing";
     behavior_coordinator_msgs::TaskStopped task_stopped_msg;
     task_stopped_msg.name = behavior.task->name;
-    task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
+    task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
     task_stopped_pub.publish(task_stopped_msg);
     return false;
   }
@@ -561,7 +582,7 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
   activation_change_pub.publish(activation_change_msg);
   behavior_coordinator_msgs::TaskStopped task_stopped_msg;
   task_stopped_msg.name = behavior.task->name;
-  task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
+  task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
   task_stopped_pub.publish(task_stopped_msg);
   behavior.task->active = false;
   behavior.task->activeBehavior = behavior.task->inactive;
@@ -573,7 +594,7 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
       behavior.task->priority = 0;
       behavior_coordinator_msgs::TaskStopped task_stopped_msg;
       task_stopped_msg.name = (*lastAssignmentIterator)->task->name;
-      task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
+      task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
       task_stopped_pub.publish(task_stopped_msg);
       for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleReactiveTasks.begin();
       incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleReactiveTasks.end(); ++incompatibleTasksIterator){
