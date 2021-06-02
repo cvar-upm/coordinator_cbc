@@ -79,6 +79,8 @@ void BehaviorCoordinator::setUp(){
                                                     "/" +activation_change_str, 1);
   behavior_activation_finished_sub = node_handle.subscribe('/' + robot_namespace + '/' + behavior_activation_finished_str,
                                                            100, &BehaviorCoordinator::behaviorActivationFinishedCallback, this);
+  behavior_coordinator_log_pub= node_handle.advertise<behavior_coordinator_msgs::BehaviorCoordinatorLog>("/" + robot_namespace +
+                                                    "/behavior_coordinator_log", 1);
   private_nh.shutdown();
 }
 
@@ -104,11 +106,18 @@ void BehaviorCoordinator::publishListOfRunningTasks(){
 */
 
 void BehaviorCoordinator::checkTimeouts(){
+
   if(!first_call){
+    behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+    logger_msg.entity=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR;
+    logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::EVENT_TIME_OUT;
     for (std::list<Task*>::iterator tasksIterator = catalog->tasks.begin(); tasksIterator != catalog->tasks.end(); ++tasksIterator){
       if((*tasksIterator)->active && (*tasksIterator)->execution_goal != "keep_running"
       && std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - (*tasksIterator)->activationTime).count() > (*tasksIterator)->timeout){
         std::cout<<"[Timeout expired]"<<std::endl;
+        logger_msg.name=(*tasksIterator)->activeBehavior->name;
+        logger_msg.header.stamp = ros::Time::now();
+        behavior_coordinator_log_pub.publish(logger_msg);
         for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin();
         lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
           if ((*lastAssignmentIterator)->task == *tasksIterator){
@@ -136,6 +145,9 @@ void BehaviorCoordinator::deactivateBehaviorFailed(Behavior behavior){
 }
 
 void BehaviorCoordinator::checkReactiveStarts(){
+  behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+  logger_msg.entity=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK;
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::START_TASK_REACTIVE;
   if(reactiveTasksToStart.size()>0){
     std::list<std::pair<Task*, std::chrono::time_point<std::chrono::system_clock>>>::iterator reactiveTasksToStartIterator = reactiveTasksToStart.begin();
     while(reactiveTasksToStartIterator != reactiveTasksToStart.end()){
@@ -148,6 +160,10 @@ void BehaviorCoordinator::checkReactiveStarts(){
         reactiveTasksToStartIterator->first->priority = 1;
         reactiveTasksToStartIterator->second = std::chrono::system_clock::now();
         std::cout<<"  "<<desiredDomain.first->name<<" (priority: "<< reactiveTasksToStartIterator->first->priority<<")"<<std::endl;
+        logger_msg.name=desiredDomain.first->name;
+        logger_msg.priority=reactiveTasksToStartIterator->first->priority;
+        logger_msg.header.stamp = ros::Time::now();
+        behavior_coordinator_log_pub.publish(logger_msg);
         for (std::list<Behavior*>::iterator behaviorsIterator = reactiveTasksToStartIterator->first->candidateBehaviors.begin();
         behaviorsIterator != reactiveTasksToStartIterator->first->candidateBehaviors.end(); ++behaviorsIterator){
           if(*behaviorsIterator != reactiveTasksToStartIterator->first->inactive){
@@ -194,6 +210,15 @@ bool BehaviorCoordinator::activateTaskCallback(behavior_coordinator_msgs::StartT
   
   std::cout << "[Activation request]"<< std::endl;
   std::cout << "  " << request.task.name;
+  behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+  logger_msg.entity=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK;
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::START_TASK_REQUEST;
+  logger_msg.name=request.task.name;
+  logger_msg.parameters=request.task.parameters;
+  logger_msg.priority=request.task.priority;
+  logger_msg.header.stamp = ros::Time::now();
+  behavior_coordinator_log_pub.publish(logger_msg);
+
   if((request.task.parameters).size()>0){
     std::cout << " " << request.task.parameters;
   }
@@ -233,10 +258,24 @@ bool BehaviorCoordinator::activateTaskCallback(behavior_coordinator_msgs::StartT
     requestedTask->arguments = request.task.parameters;
     requestedTask->priority = int(request.task.priority);
     response.ack = generateAndExecuteAssignment(int(request.task.priority),desiredDomain);
+    if( !response.ack)
+    {
+	    logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK_STARTED;
+    	logger_msg.failure=1;
+	    logger_msg.termination_cause=behavior_coordinator_msgs::BehaviorCoordinatorLog::IMPOSSIBLE_ACTIVATION;
+      logger_msg.header.stamp = ros::Time::now();
+    	behavior_coordinator_log_pub.publish(logger_msg);
+    }
+
   }
   else{
     response.ack = false;
     response.error_message = "No possible activations found. (The required behaviors nodes might not be active or incompatible request with current activations)";
+    logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK_STARTED;
+    logger_msg.failure=1;
+    logger_msg.termination_cause=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK_NOT_FOUND;
+    logger_msg.header.stamp = ros::Time::now();
+    behavior_coordinator_log_pub.publish(logger_msg);
   }
   for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin();
   lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
@@ -268,6 +307,13 @@ bool BehaviorCoordinator::deactivateTaskCallback(behavior_coordinator_msgs::Stop
   std::string taskName = request.name;
   std::cout << "[Deactivation request]"<< std::endl;
   std::cout << "  " << taskName << std::endl;
+  behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+  logger_msg.entity=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK;
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::STOP_TASK_REQUEST;
+  logger_msg.name=request.name;
+  logger_msg.header.stamp = ros::Time::now();
+  behavior_coordinator_log_pub.publish(logger_msg);
+
   for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin();
   lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
     if ((*lastAssignmentIterator)->task->name == taskName){
@@ -278,9 +324,17 @@ bool BehaviorCoordinator::deactivateTaskCallback(behavior_coordinator_msgs::Stop
       desiredDomain.second.push_back((*lastAssignmentIterator)->task->inactive);
       if(generateAndExecuteAssignment((*lastAssignmentIterator)->task->priority,desiredDomain)){
         response.ack = true;
+        logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK_STOPPED;
+        logger_msg.failure=0;
+        logger_msg.header.stamp = ros::Time::now();
+        behavior_coordinator_log_pub.publish(logger_msg);
       }
       else{
         response.ack = false;
+        logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::TASK_STOPPED;
+        logger_msg.failure=1;
+        logger_msg.header.stamp = ros::Time::now();
+        behavior_coordinator_log_pub.publish(logger_msg);
       }
       break;
     }
@@ -291,6 +345,12 @@ bool BehaviorCoordinator::deactivateTaskCallback(behavior_coordinator_msgs::Stop
 void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_execution_manager_msgs::BehaviorActivationFinished &message){
   std::string behavior = message.name;
   bool found = false;
+  behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+  logger_msg.entity=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR;
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_ACTIVATION_FINISHED;
+  logger_msg.name=message.name;
+
+
   for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin();
   lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
     if ((*lastAssignmentIterator)->name == behavior){
@@ -301,18 +361,22 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
         case behavior_execution_manager_msgs::BehaviorActivationFinished::GOAL_ACHIEVED:
             std::cout<<" (GOAL_ACHIEVED)"<<std::endl;
             (*lastAssignmentIterator)->task->change_type = behavior_coordinator_msgs::ActivationChange::GOAL_ACHIEVED_SELF_DEACTIVATION;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::GOAL_ACHIEVED;
             break;
         case behavior_execution_manager_msgs::BehaviorActivationFinished::TIME_OUT:
             std::cout<<" (TIME_OUT)"<<std::endl;
             (*lastAssignmentIterator)->task->change_type = behavior_coordinator_msgs::ActivationChange::TIME_OUT_DEACTIVATION;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::TIME_OUT;
             break;
         case behavior_execution_manager_msgs::BehaviorActivationFinished::WRONG_PROGRESS:
             std::cout<<" (WRONG_PROGRESS)"<<std::endl;
             (*lastAssignmentIterator)->task->change_type = behavior_coordinator_msgs::ActivationChange::WRONG_PROGRESS_SELF_DEACTIVATION;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::WRONG_PROGRESS;
             break;
         case behavior_execution_manager_msgs::BehaviorActivationFinished::PROCESS_FAILURE:
             std::cout<<" (PROCESS_FAILURE)"<<std::endl;
             (*lastAssignmentIterator)->task->change_type = behavior_coordinator_msgs::ActivationChange::PROCESS_FAILURE_SELF_DEACTIVATION;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::PROCESS_FAILURE;
             break;
         case behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED:
             if((*lastAssignmentIterator)->task->change_type == behavior_coordinator_msgs::ActivationChange::REQUESTED_DEACTIVATION){
@@ -320,11 +384,14 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
               return;
             }
             std::cout<<" (UNKNOWN_DEACTIVATION)"<<std::endl;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::INTERRUPTED;
             (*lastAssignmentIterator)->task->change_type = behavior_coordinator_msgs::ActivationChange::UNKNOWN_DEACTIVATION;
             break;
         reactive_start:
             std::cout<<message.error_message;
       }
+      logger_msg.header.stamp = ros::Time::now();
+      behavior_coordinator_log_pub.publish(logger_msg);
       behavior_coordinator_msgs::ActivationChange activation_change_msg;
       activation_change_msg.change_type = (*lastAssignmentIterator)->task->change_type;
       activation_change_msg.task_behavior.behavior = behavior;
@@ -407,14 +474,19 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
           if((*behaviorsIterator).task->requested){
             (*behaviorsIterator).task->change_type = behavior_coordinator_msgs::ActivationChange::REQUESTED_DEACTIVATION;
             std::cout<<" (REQUESTED_DEACTIVATION)"<<std::endl;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::REQUESTED_DEACTIVATION;
           }
           else{
             std::cout<<" (AUTOMATIC_DEACTIVATION)"<<std::endl;
+            logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::AUTOMATIC_DEACTIVATION;
           }
         }
         else{
           std::cout<<" (TIME_OUT_SELF_DEACTIVATION)"<<std::endl;
+          logger_msg.termination_cause= behavior_coordinator_msgs::BehaviorCoordinatorLog::TIME_OUT_SELF_DEACTIVATION;
         }
+        logger_msg.header.stamp = ros::Time::now();
+        behavior_coordinator_log_pub.publish(logger_msg);
         break;
       }
     }
@@ -430,6 +502,14 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
 bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string arguments, int priority){
   std::string behavior_name = behavior->name;
   std::cout<<"  Activate "<<behavior_name<<std::endl;
+  behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+  logger_msg.entity=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR;
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_ACTIVATION_REQUEST;
+  logger_msg.name=behavior->name;
+  logger_msg.parameters=arguments;
+  logger_msg.header.stamp = ros::Time::now();
+  behavior_coordinator_log_pub.publish(logger_msg);
+
   std::transform(behavior_name.begin(), behavior_name.end(), behavior_name.begin(), ::tolower);
   std::string behavior_path;
   behavior_path =  "/" + robot_namespace + "/" + behavior->package + "/behavior_" + behavior_name + "/activate_behavior";
@@ -448,6 +528,10 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
       task_stopped_msg.name = behavior->task->name;
       task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
       task_stopped_pub.publish(task_stopped_msg);
+      logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_ACTIVATED;
+      logger_msg.failure=1;
+      logger_msg.header.stamp = ros::Time::now();
+      behavior_coordinator_log_pub.publish(logger_msg);
       return false;
     }
   }
@@ -467,6 +551,11 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
   activation_change_msg.task_behavior.task_command.parameters = behavior->task->arguments;
   activation_change_msg.task_behavior.task_command.priority = behavior->task->priority;
   activation_change_pub.publish(activation_change_msg);
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_ACTIVATED;
+  logger_msg.failure=0;
+  logger_msg.header.stamp = ros::Time::now();
+  behavior_coordinator_log_pub.publish(logger_msg);
+
   for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin(); lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
     if ((*lastAssignmentIterator)->task == behavior->task){
       lastAssignment.erase(lastAssignmentIterator);
@@ -524,6 +613,13 @@ bool BehaviorCoordinator::activateBehavior(Behavior* behavior, std::string argum
 bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
   std::string behavior_name = behavior.name;
   std::cout<<"  Deactivate "<<behavior_name<<std::endl;
+  behavior_coordinator_msgs::BehaviorCoordinatorLog logger_msg;
+  logger_msg.entity=2;
+  logger_msg.event=6;
+  logger_msg.name=behavior.name;
+  logger_msg.header.stamp = ros::Time::now();
+  behavior_coordinator_log_pub.publish(logger_msg);
+
   std::transform(behavior_name.begin(), behavior_name.end(), behavior_name.begin(), ::tolower);
   std::string behavior_path;
   if(behavior.package != "") {
@@ -537,6 +633,11 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
   if(!testing && !behavior_cli.call(deactivate_msg)){
     std::cout<<"ERROR DEACTIVATING THE BEHAVIOR: "<<behavior.name<<std::endl;
     std::cout<<"Behavior: [" + behavior.name + "] is not executing";
+    logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_DEACTIVATED;
+    logger_msg.failure=1;
+    logger_msg.header.stamp = ros::Time::now();
+    behavior_coordinator_log_pub.publish(logger_msg);
+
     behavior_coordinator_msgs::TaskStopped task_stopped_msg;
     task_stopped_msg.name = behavior.task->name;
     task_stopped_msg.termination_cause = behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED;
@@ -544,6 +645,10 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
     return false;
   }
   if(!testing && !deactivate_msg.response.ack){
+    logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_DEACTIVATED;
+    logger_msg.failure=1;
+    logger_msg.header.stamp = ros::Time::now();
+    behavior_coordinator_log_pub.publish(logger_msg);
     return false;
   }
   if(behavior.task->requested){
@@ -552,6 +657,12 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
   else{
     behavior.task->change_type = behavior_coordinator_msgs::ActivationChange::AUTOMATIC_DEACTIVATION;
   }
+  
+  logger_msg.event=behavior_coordinator_msgs::BehaviorCoordinatorLog::BEHAVIOR_DEACTIVATED;
+  logger_msg.failure=0;
+  logger_msg.header.stamp = ros::Time::now();
+  behavior_coordinator_log_pub.publish(logger_msg);
+
   behavior_coordinator_msgs::ActivationChange activation_change_msg;
   activation_change_msg.change_type = behavior.task->change_type;
   activation_change_msg.task_behavior.behavior = behavior.name;
