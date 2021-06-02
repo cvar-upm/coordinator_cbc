@@ -11,6 +11,7 @@ add_message_files(
   ActivationChange.msg
   ListOfRunningTasks.msg
   TaskStopped.msg
+  BehaviorCoordinatorLog.msg
 )
 
 add_service_files(

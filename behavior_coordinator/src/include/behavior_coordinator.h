@@ -56,6 +56,7 @@
 #include <behavior_execution_manager_msgs/ActivateBehavior.h>
 #include <behavior_execution_manager_msgs/DeactivateBehavior.h>
 #include <behavior_coordinator_msgs/ActivationChange.h>
+#include <behavior_coordinator_msgs/BehaviorCoordinatorLog.h>
 
 class BehaviorCoordinator
 {
@@ -95,6 +96,7 @@ public:
   ros::Publisher task_stopped_pub;
   //ros::Publisher list_of_running_tasks_pub;
   ros::Publisher activation_change_pub;
+  ros::Publisher behavior_coordinator_log_pub;
 
   void behaviorActivationFinishedCallback(const behavior_execution_manager_msgs::BehaviorActivationFinished &message);
   bool activateTaskCallback(behavior_coordinator_msgs::StartTask::Request &request, behavior_coordinator_msgs::StartTask::Response &response);
