@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package>
+  <name> behavior_coordinator_logger</name>
+  <version>1.0.0</version>
+  <description>
+
+     behavior coordinator logger
+
+  </description>
+  <author>Ángel Higuera Vaquero</author>
+  <author email="a.higuera@alumnos.upm.es">Ángel Higuera Vaquero </author>
+  <maintainer email="a.higuera@alumnos.upm.es">Ángel Higuera Vaquero</maintainer>
+
+  <license>BSD-3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>libqt4-dev</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>aerostack_msgs</build_depend>
+  <build_depend>behavior_coordinator_msgs</build_depend>
+  <build_depend>genmsg</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>yaml-cpp</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>libqt4-dev</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>aerostack_msgs</run_depend>
+  <run_depend>behavior_coordinator_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>yaml-cpp</run_depend>
+  <build_depend>message_generation</build_depend>
+
+</package>

@@ -1,0 +1,12 @@
+<!-- Launches: graphical_user_interface;-->
+<launch>
+    <!-- master tag is only obeyed in the top-level file (not in includes) 
+    <master>
+    </master>-->
+     <param name="all_behaviors" command="rosservice find behavior_execution_manager_msgs/CheckActivation"/>
+    <node name="behavior_coordinator_logger_process" pkg="behavior_coordinator_logger" type="behavior_coordinator_logger" output="screen">
+       
+    </node>
+        
+</launch>
+
