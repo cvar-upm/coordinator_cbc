@@ -3,7 +3,10 @@
     <!-- master tag is only obeyed in the top-level file (not in includes) 
     <master>
     </master>-->
+    <arg name="drone_id_namespace"                    default="drone1" />
+
      <param name="all_behaviors" command="rosservice find behavior_execution_manager_msgs/CheckActivation"/>
+     <param name="drone_id_namespace"     value="$(arg drone_id_namespace)"    type="str" />
     <node name="behavior_coordinator_logger_process" pkg="behavior_coordinator_logger" type="behavior_coordinator_logger" output="screen">
        
     </node>

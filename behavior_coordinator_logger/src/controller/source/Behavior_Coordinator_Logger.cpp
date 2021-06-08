@@ -45,8 +45,9 @@ Behavior_Coordinator_Logger::Behavior_Coordinator_Logger(QWidget *parent)
     QHeaderView* horizontalHeaderActiveTableui=ui->activeTable->horizontalHeader();
     horizontalHeaderActiveTableui->setSectionResizeMode(QHeaderView::Stretch);
 
-    n.param<std::string>("robot_namespace", drone_id_namespace, "drone111");
+    n.param<std::string>("drone_id_namespace", drone_id_namespace, "drone111");
     n.param<std::string>("activation_change", behavior_coordination_log, "behavior_coordinator_log");
+    std::cout << drone_id_namespace << std::endl ;
 
     behavior_coordination_log_sub = n.subscribe("/" + drone_id_namespace + "/" + behavior_coordination_log, 1000, &Behavior_Coordinator_Logger::newBehaviorCoordiantorLogCallback, this);
     
