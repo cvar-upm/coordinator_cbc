@@ -92,7 +92,7 @@ include_directories(
 
 add_library(behavior_coordinator_lib ${BEHAVIOR_COORDINATOR_SOURCE_FILES} ${BEHAVIOR_COORDINATOR_HEADER_FILES})
 add_dependencies(behavior_coordinator_lib ${catkin_EXPORTED_TARGETS})
-target_link_libraries(behavior_coordinator_lib ${catkin_LIBRARIES})
+target_link_libraries(behavior_coordinator_lib ${catkin_LIBRARIES} yaml-cpp)
 
 add_executable(behavior_coordinator ${BEHAVIOR_COORDINATOR_SOURCE_DIR}/behavior_coordinator_main.cpp)
 add_dependencies(behavior_coordinator ${catkin_EXPORTED_TARGETS})
