@@ -232,6 +232,7 @@ bool BehaviorCoordinator::activateTaskCallback(behavior_coordinator_msgs::StartT
       break;
     }
   }
+  currentActivationArgument = request.task.parameters;
   if(taskExists && int(request.task.priority) >= requestedTask->priority){
     requestedTask->requested = true;
     if(requestedTask->active && request.task.priority >= int(requestedTask->priority)){
@@ -239,6 +240,7 @@ bool BehaviorCoordinator::activateTaskCallback(behavior_coordinator_msgs::StartT
       requestedTask->arguments = request.task.parameters;
       requestedTask->priority = int(request.task.priority);
       Behavior* reactivate_behavior = &*requestedTask->activeBehavior;
+      reactivate_behavior->task->requestedRestart = true;
       if(deactivateBehavior(*requestedTask->activeBehavior) && activateBehavior(reactivate_behavior, requestedTask->arguments, int(request.task.priority))){
         reactivate_behavior->task->change_type = behavior_coordinator_msgs::ActivationChange::REQUESTED_DEACTIVATION;
         response.ack = true;
@@ -381,6 +383,9 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
         case behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED:
             if((*lastAssignmentIterator)->task->change_type == behavior_coordinator_msgs::ActivationChange::REQUESTED_DEACTIVATION){
               std::cout<<" (REQUESTED_DEACTIVATION)"<<std::endl;
+              if((*lastAssignmentIterator)->task->requestedRestart){
+                (*lastAssignmentIterator)->task->requestedRestart = false;
+              }
               return;
             }
             std::cout<<" (UNKNOWN_DEACTIVATION)"<<std::endl;
@@ -476,7 +481,12 @@ void BehaviorCoordinator::behaviorActivationFinishedCallback(const behavior_exec
         default:
             task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::UNKNOWN;
         }
-        task_stopped_pub.publish(task_stopped_msg);
+        if(!(*lastAssignmentIterator)->task->requestedRestart || message.termination_cause != behavior_execution_manager_msgs::BehaviorActivationFinished::INTERRUPTED){
+          task_stopped_pub.publish(task_stopped_msg);
+        }
+        else{
+          (*lastAssignmentIterator)->task->requestedRestart = false;
+        }
         desiredDomain.first = (*lastAssignmentIterator)->task;
         desiredDomain.second.clear();
         desiredDomain.second.push_back((*lastAssignmentIterator)->task->inactive);
@@ -694,7 +704,9 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
   behavior_coordinator_msgs::TaskStopped task_stopped_msg;
   task_stopped_msg.name = behavior.task->name;
   task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
-  task_stopped_pub.publish(task_stopped_msg);
+  if(!behavior.task->requestedRestart){
+    task_stopped_pub.publish(task_stopped_msg);
+  }
   behavior.task->active = false;
   behavior.task->activeBehavior = behavior.task->inactive;
   for (std::list<Behavior*>::iterator lastAssignmentIterator = lastAssignment.begin(); lastAssignmentIterator != lastAssignment.end(); ++lastAssignmentIterator){
@@ -706,7 +718,9 @@ bool BehaviorCoordinator::deactivateBehavior(Behavior behavior){
       behavior_coordinator_msgs::TaskStopped task_stopped_msg;
       task_stopped_msg.name = (*lastAssignmentIterator)->task->name;
       task_stopped_msg.termination_cause = behavior_coordinator_msgs::TaskStopped::INTERRUPTED;
-      task_stopped_pub.publish(task_stopped_msg);
+      if(!behavior.task->requestedRestart){
+        task_stopped_pub.publish(task_stopped_msg);
+      }
       for(std::list<Task*>::iterator incompatibleTasksIterator = (*lastAssignmentIterator)->task->incompatibleReactiveTasks.begin();
       incompatibleTasksIterator != (*lastAssignmentIterator)->task->incompatibleReactiveTasks.end(); ++incompatibleTasksIterator){
         bool reactive_startTaskWaiting = false;
@@ -1011,6 +1025,7 @@ bool BehaviorCoordinator::executeAssignment(){
     reducedAssignmentIterator=bestBehaviorAssignment.erase(reducedAssignmentIterator);
   }
   for(std::list<std::pair<Task, std::list<Behavior*>>>::iterator activationListIterator = activationList.begin(); activationListIterator != activationList.end();++activationListIterator){
+    activationListIterator->second.front()->task->arguments = currentActivationArgument;
     if(activateBehavior(activationListIterator->second.front(),
     activationListIterator->second.front()->task->arguments, activationListIterator->second.front()->task->priority)){
       activationListIterator->second.front()->task->activationTime = std::chrono::system_clock::now();

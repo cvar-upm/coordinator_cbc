@@ -54,6 +54,7 @@ public:
   std::string execution_goal;
   bool isReactive_started = false;
   bool requested = false;
+  bool requestedRestart = false;
   int change_type;
   std::list<std::pair<std::string,std::string>> parameters;
   std::string arguments;

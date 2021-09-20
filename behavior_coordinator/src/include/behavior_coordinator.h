@@ -154,6 +154,7 @@ public:
   std::list<Constraint*> agendaG;
   std::list<Constraint*> noGoodconstraints;
   bool testing;
+  std::string currentActivationArgument = "";
 
 private:
 
